@@ -1,5 +1,6 @@
 package gui;
 
+import commands.JSONConfig;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -54,5 +55,8 @@ public class GUI extends Application {
         Scene scene = new Scene(vbox, 950, 500);
         primaryStage.setScene(scene);
         primaryStage.show();
+
+
+        new JSONConfig().readJSONConfig();
     }
 }

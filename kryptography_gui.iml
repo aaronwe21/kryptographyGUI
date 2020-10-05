@@ -19,5 +19,6 @@
     <orderEntry type="library" name="javafx_swt" level="project" />
     <orderEntry type="library" name="hsqldb" level="project" />
     <orderEntry type="library" name="guava" level="project" />
+    <orderEntry type="library" name="java-json" level="project" />
   </component>
 </module>
