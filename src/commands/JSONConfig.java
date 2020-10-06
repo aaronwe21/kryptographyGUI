@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 public class JSONConfig {
 
     public void readJSONConfig(){
-        String path = System.getProperty("user.dir") + "/src/Config.json";
+        String path = System.getProperty("user.dir") + "/data/shiftKey.json";
         try {
             String contents = new String ((Files.readAllBytes(Paths.get(path))));
             JSONObject ob = new JSONObject(contents);
