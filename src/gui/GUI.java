@@ -1,5 +1,6 @@
 package gui;
 
+import commands.Commands;
 import commands.JSONConfig;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -11,6 +12,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import persistence.HSQLDB;
 
 public class GUI extends Application {
     public void start(Stage primaryStage) {
@@ -58,5 +60,6 @@ public class GUI extends Application {
 
 
         new JSONConfig().readJSONConfig();
+
     }
 }

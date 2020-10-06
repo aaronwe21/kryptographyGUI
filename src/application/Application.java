@@ -23,6 +23,7 @@ public class Application {
         HSQLDB.instance.insertDataTableParticipants("branch_wuh", 1);
         HSQLDB.instance.insertDataTableParticipants("msa", 2);
 
+
         HSQLDB.instance.shutdown();
     }
 }
