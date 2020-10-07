@@ -1,4 +1,4 @@
-package commands;
+package network;
 
 public enum AlgorithmType {
     Shift,

@@ -1,5 +1,8 @@
 package commands;
 
+import network.AlgorithmType;
+import network.Participant;
+import network.ParticipantType;
 import persistence.HSQLDB;
 
 import java.sql.ResultSet;
@@ -44,6 +47,7 @@ public class Commands {
             //insert participant and create postbox
             HSQLDB.instance.insertDataTableParticipants(name, id);
             HSQLDB.instance.createTablePostbox(name);
+
 
             String outputSuccess = "participant" + name + "with type " + type.toString() + " registered and postbox_" + name + " created";
             System.out.println("--- " + outputSuccess);
