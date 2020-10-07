@@ -68,7 +68,7 @@ public class GUI extends Application {
                 }
                 if (keyEvent.getCode() == KeyCode.F5){
                     System.out.println("--- execute ---");
-                    CommandHandler.execute(commandLineArea.getText());
+                    outputArea.setText(CommandHandler.execute(commandLineArea.getText()));
                 }
                 if (keyEvent.getCode() == KeyCode.F8){
                     Log logXXX = new Log(LogOperationType.encrypt, "rsa");
@@ -88,20 +88,18 @@ public class GUI extends Application {
             public void handle(ActionEvent event)
             {
                 System.out.println("--- execute ---");
-                CommandHandler.execute(commandLineArea.getText());
+                outputArea.setText(CommandHandler.execute(commandLineArea.getText()));
             }
         });
 
         closeButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent actionEvent) {
+                HSQLDB.instance.shutdown();
                 System.exit(0);
             }
         });
         primaryStage.setScene(scene);
         primaryStage.show();
-
-
-        new JSONConfig().readJSONConfig();
 
 
         HSQLDB.instance.setupConnection();
@@ -112,9 +110,5 @@ public class GUI extends Application {
                 HSQLDB.instance.shutdown();
             }
         });
-
-
-
-
     }
 }
