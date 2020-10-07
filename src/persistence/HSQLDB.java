@@ -384,8 +384,8 @@ public enum HSQLDB {
             statement.close();
             return result;
 
-        } catch (SQLException sqle) {
-            System.out.println(sqle.getMessage());
+        } catch (SQLException sqlException) {
+            System.out.println(sqlException.getMessage());
             return null;
         }
     }
@@ -393,6 +393,23 @@ public enum HSQLDB {
     public void resetDatabase()
     {
         getDataFromManualSQL("SELECT TABLE_NAME FROM INFORMATION_SCHEMA");
+    }
+
+    public String getParticipantNameByID(int id) throws SQLException {
+        ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT name FROM participants WHERE id = " + id);
+        return resultSet.getNString("id");
+    }
+
+    public void deleteRows(String sqlStatement)
+    {
+        try {
+            Statement statement = connection.createStatement();
+            int result = statement.executeUpdate(sqlStatement);
+            statement.close();
+
+        } catch (SQLException sqlException) {
+            System.out.println(sqlException.getMessage());
+        }
     }
 
     public void shutdown() {
