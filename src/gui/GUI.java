@@ -1,6 +1,7 @@
 package gui;
 
 import commands.CommandHandler;
+import commands.Commands;
 import commands.JSONConfig;
 import configuration.Configuration;
 import javafx.application.Application;
@@ -17,6 +18,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import persistence.Log;
 import persistence.LogOperationType;
+import persistence.HSQLDB;
 
 public class GUI extends Application {
     public void start(Stage primaryStage) {
@@ -99,6 +101,4 @@ public class GUI extends Application {
 
         new JSONConfig().readJSONConfig();
     }
-
-
 }

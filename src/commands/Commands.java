@@ -40,5 +40,6 @@ public class Commands {
 
     public void sendMessage(String message, Participant part1, Participant part2, AlgorithmType algorithm, String filename){
 
+        int unixTimeStampSeconds = (int)(System.currentTimeMillis()/1000L); //only works until 2038
     }
 }
