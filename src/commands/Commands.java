@@ -1,5 +1,10 @@
 package commands;
 
+import persistence.HSQLDB;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 public class Commands {
 
     public void showAlgorithm(){
@@ -18,7 +23,21 @@ public class Commands {
 
     }
 
-    public void registerParticipant(String name, ParticipantType type){
+    public void registerParticipant(String name, ParticipantType type) {
+
+        try {
+            ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM types WHERE type = '" + type.toString() + "'");
+            int id = 0;
+            if (resultSet.next()) {
+                id = resultSet.getInt("id");
+            }
+
+            HSQLDB.instance.insertDataTableParticipants(name, id);
+        }
+        catch (SQLException sqlException)
+        {
+            System.out.println("SQLException: " + sqlException.getMessage());
+        }
 
     }
 

@@ -376,6 +376,25 @@ public enum HSQLDB {
 
     //endregion
 
+    public ResultSet getDataFromManualSQL(String sqlStatement){
+        try {
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(sqlStatement);
+
+            statement.close();
+            return result;
+
+        } catch (SQLException sqle) {
+            System.out.println(sqle.getMessage());
+            return null;
+        }
+    }
+
+    public void resetDatabase()
+    {
+        getDataFromManualSQL("SELECT TABLE_NAME FROM INFORMATION_SCHEMA");
+    }
+
     public void shutdown() {
         System.out.println("--- shutdown");
 

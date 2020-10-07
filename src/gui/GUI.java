@@ -2,6 +2,7 @@ package gui;
 
 import commands.Commands;
 import commands.JSONConfig;
+import commands.ParticipantType;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -12,7 +13,9 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import persistence.HSQLDB;
+
 
 public class GUI extends Application {
     public void start(Stage primaryStage) {
@@ -28,6 +31,7 @@ public class GUI extends Application {
 
         Button closeButton = new Button("Close");
         closeButton.setPrefSize(100, 20);
+
 
         executeButton.setOnAction(new EventHandler<ActionEvent>() {
             public void handle(ActionEvent event) {
@@ -60,6 +64,19 @@ public class GUI extends Application {
 
 
         new JSONConfig().readJSONConfig();
+
+
+        HSQLDB.instance.setupConnection();
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent windowEvent) {
+                HSQLDB.instance.shutdown();
+            }
+        });
+
+
+
 
     }
 }
