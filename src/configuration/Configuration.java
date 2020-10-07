@@ -16,4 +16,18 @@ public enum Configuration {
 
     // component
     public String componentDirectory = userDirectory + fileSeparator + "component";
+
+    // log
+    public String logDirectory = userDirectory + fileSeparator + "log";
+
+    // debug-mode
+    private boolean debugModeActive = false;
+
+    public void changeDebugMode(){
+        debugModeActive = !debugModeActive;
+    }
+
+    public boolean getDebugModeActive(){
+        return debugModeActive;
+    }
 }
