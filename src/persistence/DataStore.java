@@ -11,6 +11,14 @@ public enum DataStore {
     private ArrayList<Participant> participants = new ArrayList<Participant>();
     private ArrayList<Channel> channels = new ArrayList<Channel>();
 
+    public ArrayList<Participant> getParticipants() {
+        return participants;
+    }
+
+    public ArrayList<Channel> getChannels() {
+        return channels;
+    }
+
     public void addParticipant(Participant participant)
     {
         participants.add(participant);
