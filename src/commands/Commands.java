@@ -7,11 +7,7 @@ import persistence.HSQLDB;
 import persistence.Log;
 import persistence.LogOperationType;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.channels.Channel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -19,6 +15,7 @@ public class Commands {
 
     public static String showAlgorithm(){
         File componentDirectory = new File(Configuration.instance.componentDirectory);
+
         String returnString = "";
         if (componentDirectory.isDirectory()) {
             File[] componentFiles = componentDirectory.listFiles();
@@ -46,8 +43,12 @@ public class Commands {
             log = new Log(LogOperationType.encrypt, algorithm);
         }
 
-        printInfo("Encrypt Methode, hallo Welt wie gehts dir so?", log);
-        printInfo("Dies ist die zweite Zeile?", log);
+        File keyFile = getKeyFileFromFileName(filename);
+        ComponentLoader shiftLoader = new ComponentLoader(algorithm);
+        String ciffre = shiftLoader.executeEncryptMethod(message, keyFile);
+
+
+
         return "test";
     }
 
@@ -175,5 +176,9 @@ public class Commands {
 
         int unixTimeStampSeconds = (int)(System.currentTimeMillis()/1000L); //only works until 2038
         return "test";
+    }
+
+    private static File getKeyFileFromFileName(String fileName){
+        return new File(Configuration.instance.keyDirectory+Configuration.instance.fileSeparator+fileName);
     }
 }

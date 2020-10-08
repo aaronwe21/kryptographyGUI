@@ -11,7 +11,13 @@ public class Log {
         long unixSeconds = System.currentTimeMillis() / 1000L;
         String filename = type.toString() + "_"+ algorithm +"_"+unixSeconds+".txt";
         String filepath = Configuration.instance.logDirectory+Configuration.instance.fileSeparator+filename;
+
+        File logDirectory = new File(Configuration.instance.logDirectory);
+        if(!logDirectory.isDirectory()){
+            logDirectory.mkdir();
+        }
         this.logfile = new File(filepath);
+
         try{
             logfile.createNewFile();
             System.out.println("Logfile with filename: "+filename+" created.");
@@ -55,10 +61,9 @@ public class Log {
         return "--No log file found--";
     }
 
-    private static File getNewestLogFile(){
+    private static File getNewestLogFile() {
         File logDirectory = new File(Configuration.instance.logDirectory);
         File newestFile = null;
-
         if (logDirectory.isDirectory()){
             File[] logFiles = logDirectory.listFiles();
 
@@ -72,6 +77,9 @@ public class Log {
                     }
                 }
             }
+        }
+        else{
+            logDirectory.mkdir();
         }
         return newestFile;
     }

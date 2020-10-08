@@ -1,5 +1,7 @@
 package commands;
 
+import network.ParticipantType;
+
 public class CommandHandler {
     public static String execute(String inputCommand)
     {

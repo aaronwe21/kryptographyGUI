@@ -20,6 +20,9 @@ public enum Configuration {
     // log
     public String logDirectory = userDirectory + fileSeparator + "log";
 
+    // key
+    public String keyDirectory = userDirectory + fileSeparator + "key";
+
     // debug-mode
     private boolean debugModeActive = false;
 

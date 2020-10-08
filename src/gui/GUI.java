@@ -1,10 +1,7 @@
 package gui;
 
 import commands.CommandHandler;
-import commands.Commands;
-import commands.JSONConfig;
 import configuration.Configuration;
-import commands.ParticipantType;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -19,7 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import persistence.Log;
-import persistence.LogOperationType;
 import persistence.HSQLDB;
 
 public class GUI extends Application {
