@@ -1,8 +1,8 @@
 package commands;
 
-import network.Participant;
-import network.ParticipantType;
+import network.*;
 import configuration.Configuration;
+import persistence.DataStore;
 import persistence.HSQLDB;
 import persistence.Log;
 import persistence.LogOperationType;
@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.channels.Channel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -84,14 +83,29 @@ public class Commands {
 
             //get id from type from table types
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM types WHERE type = '" + type.toString() + "'");
-            int id = 0;
+            int typeID = 0;
             if (resultSet.next()) {
-                id = resultSet.getInt("id");
+                typeID = resultSet.getInt("id");
             }
             //insert participant and create postbox
-            HSQLDB.instance.insertDataTableParticipants(name, id);
+            HSQLDB.instance.insertDataTableParticipants(name, typeID);
             HSQLDB.instance.createTablePostbox(name);
-
+            //get id from database
+            ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM participants WHERE name = '" + name + "'");
+            int partID = 0;
+            if(resultSet1.next())
+            {
+                partID = resultSet1.getInt("id");
+            }
+            //Object of Participant is instantiated
+            if(typeID == 1)
+            {
+                DataStore.instance.addParticipant(new ParticipantNormal(partID, name));
+            }
+            else if (typeID == 2)
+            {
+                DataStore.instance.addParticipant(new ParticipantIntruder(partID, name));
+            }
 
             String outputSuccess = "participant" + name + "with type " + type.toString() + " registered and postbox_" + name + " created";
             System.out.println("--- " + outputSuccess);
@@ -108,6 +122,11 @@ public class Commands {
     }
 
     public static String createChannel(String name, Participant part1, Participant part2){
+        //check if channel exists already (message on gui)
+        //check if part1 and part2 are identical (message on gui)
+        //create Object Channel
+        //register the two participants
+        //save channel in database with message on gui
         return "test";
     }
 
@@ -171,9 +190,59 @@ public class Commands {
         return "test";
     }
 
-    public static String sendMessage(String message, Participant part1, Participant part2, String algorithm, String filename){
+    public static String sendMessage(String message, String part1, String part2, String algorithm, String keyFileName){
 
-        int unixTimeStampSeconds = (int)(System.currentTimeMillis()/1000L); //only works until 2038
-        return "test";
+        //get objects participants from DataStore
+        ParticipantNormal participant01 = null;
+        ParticipantNormal participant02 = null;
+        for (Participant p: DataStore.instance.getParticipants()) {
+            if (p.getName().equals(part1) && p instanceof ParticipantNormal)
+            {
+                participant01 = (ParticipantNormal) p;
+            }
+            else if (p.getName().equals(part2) && p instanceof ParticipantNormal)
+            {
+                participant02 = (ParticipantNormal) p;
+            }
+        }
+        //check if channel between participant01 and participant02 exists
+        boolean exists = false;
+        try {
+            String statement1 = "SELECT name FROM channel WHERE participant_01 = " + participant01.getId() + " AND participant_02 = " + participant02.getId();
+            String statement2 = "SELECT name FROM channel WHERE participant_01 = " + participant02.getId() + " AND participant_02 = " + participant01.getId();
+            if (!(HSQLDB.instance.getDataFromManualSQL(statement1).next() || HSQLDB.instance.getDataFromManualSQL(statement2).next()))
+            {
+                //no channel exists
+                String output = "no valid channel from " + part1 + " to " + part2;
+                System.out.println("--- " + output);
+                return output;
+            }
+            //channel exists
+
+            //encrypt message
+            String encryptedMessage = encryptMessage(message, algorithm, keyFileName);
+            //save message in database
+            ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM algorithms WHERE name = '" + algorithm + "'");
+            int algorithmID = 0;
+            if (resultSet.next())
+            {
+                resultSet.getInt("id");
+            }
+            int unixTimeStampSeconds = (int) (System.currentTimeMillis() / 1000L); //only works until 2038
+            HSQLDB.instance.insertDataTableMessages(participant01.getId(), participant02.getId(), message, algorithmID, encryptedMessage, keyFileName, unixTimeStampSeconds);
+
+            participant01.sendMessage(participant02, new Message(encryptedMessage, algorithm, participant01.getId()), getKeyFileFromFileName(keyFileName));
+
+            //return message for output area
+            String outputSuccess = "message sent from participant" + part1 + "to participant " + part2;
+            System.out.println("--- " + outputSuccess);
+            return outputSuccess;
+        }
+        catch (SQLException sqlException)
+        {
+            String exOutput = "[method sendMessage in Commands] SQLException: " + sqlException.getMessage();
+            System.out.println(exOutput);
+            return exOutput;
+        }
     }
 }

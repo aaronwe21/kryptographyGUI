@@ -9,4 +9,6 @@ public class Channel extends EventBus {
     public String getName() {
         return name;
     }
+
+
 }
