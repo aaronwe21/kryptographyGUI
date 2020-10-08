@@ -1,8 +1,10 @@
 package persistence;
 
-import commands.Participant;
 import configuration.Configuration;
+import network.ParticipantIntruder;
+import network.ParticipantNormal;
 
+import javax.xml.crypto.Data;
 import java.sql.*;
 
 public enum HSQLDB {
@@ -189,7 +191,16 @@ public enum HSQLDB {
         sqlStringBuilder.append("(").append(nextID).append(",").append("'").append(name).append("'").append(",").append(typeID);
         sqlStringBuilder.append(")");
         System.out.println("sqlStringBuilder : " + sqlStringBuilder.toString());
+        if(typeID == 1)
+        {
+            DataStore.instance.addParticipant(new ParticipantNormal(nextID, name));
+        }
+        else
+        {
+            DataStore.instance.addParticipant(new ParticipantIntruder(nextID, name));
+        }
         update(sqlStringBuilder.toString());
+
     }
 
     //endregion

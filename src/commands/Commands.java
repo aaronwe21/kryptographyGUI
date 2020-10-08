@@ -1,5 +1,7 @@
 package commands;
 
+import network.Participant;
+import network.ParticipantType;
 import configuration.Configuration;
 import persistence.HSQLDB;
 import persistence.Log;
@@ -12,7 +14,6 @@ import java.io.IOException;
 import java.nio.channels.Channel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class Commands {
 
@@ -90,6 +91,7 @@ public class Commands {
             //insert participant and create postbox
             HSQLDB.instance.insertDataTableParticipants(name, id);
             HSQLDB.instance.createTablePostbox(name);
+
 
             String outputSuccess = "participant" + name + "with type " + type.toString() + " registered and postbox_" + name + " created";
             System.out.println("--- " + outputSuccess);
@@ -169,7 +171,7 @@ public class Commands {
         return "test";
     }
 
-    public static String sendMessage(String message, Participant part1, Participant part2, AlgorithmType algorithm, String filename){
+    public static String sendMessage(String message, Participant part1, Participant part2, String algorithm, String filename){
 
         int unixTimeStampSeconds = (int)(System.currentTimeMillis()/1000L); //only works until 2038
         return "test";
