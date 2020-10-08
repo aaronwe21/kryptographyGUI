@@ -12,29 +12,29 @@ public class CommandHandler {
             String message = extractMessageFromCommand(inputCommand);
             String algorithm = extractAlgorithmFromCommand(inputCommand);
             String filename = extractKeyFileNameFromCommand(inputCommand);
-            return inputCommand;
+            return Commands.encryptMessage(message, algorithm, filename);
         }
         if(inputCommand.matches("decrypt message \".+\" using .+ and keyfile .+\\.json")){
             String message = extractMessageFromCommand(inputCommand);
             String algorithm = extractAlgorithmFromCommand(inputCommand);
             String filename = extractKeyFileNameFromCommand(inputCommand);
-            return inputCommand;
+            return Commands.decryptMessage(message, algorithm, filename);
         }
         if(inputCommand.matches("crack encrypted message \".+\" using .+")){
             String message = extractMessageFromCommand(inputCommand);
             String algorithm = extractAlgorithmFromCommand(inputCommand);
-            return inputCommand;
+            return Commands.crackEncryptedMessage(message, algorithm);
         }
         if(inputCommand.matches("register participant .+ with type (normal|intruder)")){
             String participantName = extractOneParticipantFromCommand(inputCommand);
             ParticipantType type = extractParticipantTypeFromCommand(inputCommand);
-            return inputCommand;
+            return Commands.registerParticipant(participantName, type);
         }
         if(inputCommand.matches("create channel .+ from .+ to .+"))
         {
             String channelName = extractChannelNameFromCommand(inputCommand);
             String [] participantNames = extractTwoParticipantsFromCommand(inputCommand);
-            return inputCommand;
+            return "NOT IMPLEMENTED YET!"; //Commands.createChannel(channelName, participantNames[0], );
         }
         if(inputCommand.matches("show channel"))
         {

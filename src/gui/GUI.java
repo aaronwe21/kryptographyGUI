@@ -53,6 +53,7 @@ public class GUI extends Application {
         vbox.getChildren().addAll(hBox, commandLineArea, outputArea);
 
         Scene scene = new Scene(vbox, 950, 500);
+
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent keyEvent) {
                 if (keyEvent.getCode() == KeyCode.F3){
@@ -71,14 +72,6 @@ public class GUI extends Application {
                     outputArea.setText(CommandHandler.execute(commandLineArea.getText()));
                 }
                 if (keyEvent.getCode() == KeyCode.F8){
-                    Log logXXX = new Log(LogOperationType.encrypt, "rsa");
-                    logXXX.addLineToLog("Hallo");
-                    logXXX.addLineToLog("Welt");
-                    logXXX.addLineToLog("wie");
-                    logXXX.addLineToLog("gehts");
-                    logXXX.addLineToLog("?");
-
-
                     outputArea.setText(Log.getNewestLogText());
                 }
             }
@@ -98,6 +91,7 @@ public class GUI extends Application {
                 System.exit(0);
             }
         });
+
         primaryStage.setScene(scene);
         primaryStage.show();
 

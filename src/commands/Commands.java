@@ -1,25 +1,71 @@
 package commands;
 
+import configuration.Configuration;
 import persistence.HSQLDB;
+import persistence.Log;
+import persistence.LogOperationType;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.channels.Channel;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Commands {
 
     public static String showAlgorithm(){
+        File componentDirectory = new File(Configuration.instance.componentDirectory);
+        String returnString = "";
+        if (componentDirectory.isDirectory()) {
+            File[] componentFiles = componentDirectory.listFiles();
+
+            if (componentFiles.length > 0) {
+                for (int i=0; i<componentFiles.length; i++){
+                    if ((!componentFiles[i].getName().contains("_cracker"))&&(componentFiles[i].getName().matches(".*\\.jar"))){
+                        String algorithmName = componentFiles[i].getName().replace(".jar","");
+                        returnString += algorithmName;
+                        returnString += " | ";
+
+                        // HIER GGF ALGORITHMEN IN DATENBANK EINFÜGEN JE NACHDEM WIE DAS IMPLEMENTIERT IST!
+                    }
+                }
+                return returnString.substring(0,returnString.length()-3);
+            }
+            return "No components found in this directory!";
+        }
+        return "No directory 'component' found!";
+    }
+
+    public static String encryptMessage(String message, String algorithm, String filename){
+        Log log = null;
+        if (Configuration.instance.getDebugModeActive()){
+            log = new Log(LogOperationType.encrypt, algorithm);
+        }
+
+        printInfo("Encrypt Methode, hallo Welt wie gehts dir so?", log);
+        printInfo("Dies ist die zweite Zeile?", log);
         return "test";
     }
 
-    public static String encryptMessage(String message, AlgorithmType algorithm, String filename){
+    public static String decryptMessage(String message, String algorithm, String filename){
+        Log log = null;
+        if (Configuration.instance.getDebugModeActive()){
+            log = new Log(LogOperationType.decrypt, algorithm);
+        }
         return "test";
     }
 
-    public static String decryptMessage(String message, AlgorithmType algorithm, String filename){
-        return "test";
+    private static void printInfo(String text, Log log){
+        System.out.println(text);
+        if(log != null){
+            log.addLineToLog(text);
+        }
     }
 
-    public static String crackEncryptedMessage(String message, AlgorithmType algorithm){
+    public static String crackEncryptedMessage(String message, String algorithm){
         return "test";
     }
 
