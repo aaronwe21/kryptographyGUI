@@ -3,10 +3,10 @@ package network;
 public class Message {
 
     private String encryptedMessage;
-    private AlgorithmType algorithmType;
+    private String algorithmType;
     private int participantFromID;
 
-    public Message (String encryptedMessage, AlgorithmType algorithmType, int participantFromID)
+    public Message (String encryptedMessage, String algorithmType, int participantFromID)
     {
         this.encryptedMessage = encryptedMessage;
         this.algorithmType = algorithmType;
@@ -17,7 +17,7 @@ public class Message {
         return encryptedMessage;
     }
 
-    public AlgorithmType getAlgorithmType() {
+    public String getAlgorithmType() {
         return algorithmType;
     }
 

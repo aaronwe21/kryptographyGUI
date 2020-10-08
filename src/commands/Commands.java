@@ -1,6 +1,5 @@
 package commands;
 
-import network.AlgorithmType;
 import network.Participant;
 import network.ParticipantType;
 import persistence.HSQLDB;
@@ -14,15 +13,15 @@ public class Commands {
         return "test";
     }
 
-    public static String encryptMessage(String message, AlgorithmType algorithm, String filename){
+    public static String encryptMessage(String message, String algorithmType, String filename){
         return "test";
     }
 
-    public static String decryptMessage(String message, AlgorithmType algorithm, String filename){
+    public static String decryptMessage(String message, String algorithmType, String filename){
         return "test";
     }
 
-    public static String crackEncryptedMessage(String message, AlgorithmType algorithm){
+    public static String crackEncryptedMessage(String message, String algorithmType){
         return "test";
     }
 
@@ -127,7 +126,7 @@ public class Commands {
         return "test";
     }
 
-    public static String sendMessage(String message, Participant part1, Participant part2, AlgorithmType algorithm, String filename){
+    public static String sendMessage(String message, Participant part1, Participant part2, String algorithmType, String filename){
 
         int unixTimeStampSeconds = (int)(System.currentTimeMillis()/1000L); //only works until 2038
         return "test";

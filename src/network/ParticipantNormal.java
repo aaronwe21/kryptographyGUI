@@ -43,5 +43,10 @@ public class ParticipantNormal extends Participant {
         }
     }
 
+    public void sendMessage()
+    {
+
+    }
+
 
 }
