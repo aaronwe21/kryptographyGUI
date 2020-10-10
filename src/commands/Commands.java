@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Commands {
 
@@ -127,18 +128,68 @@ public class Commands {
     }
 
     public static String createChannel(String name, Participant part1, Participant part2){
-        //check if channel exists already (message on gui)
-        //check if part1 and part2 are identical (message on gui)
-        //create Object Channel
-        //register the two participants
-        //save channel in database with message on gui
-        return "test";
+
+        try {
+            //check if channel exists or not
+            ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
+            if (resultSet1.next())
+            {
+                //return message for output area
+                String outputChannelExists = "channel " + name + " already exists";
+                System.out.println("--- " + outputChannelExists);
+                return outputChannelExists;
+            }
+
+            //check if channel between participant01 and participant02 exists or not
+            ResultSet resultSet2 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel");
+            while (resultSet2.next())
+            {
+                boolean firstCheck = resultSet2.getInt("participant_01") == part1.getId() && resultSet2.getInt("participant_02") == part2.getId();
+                boolean switchCheck = resultSet2.getInt("participant_01") == part2.getId() && resultSet2.getInt("participant_02") == part1.getId();
+                if (firstCheck || switchCheck)
+                {
+                    //return message for output area
+                    String outputCommunicationExists = "communication channel between " + part1.getName() + " and " + part2.getName() + " already exists";
+                    System.out.println("--- " + outputCommunicationExists);
+                    return outputCommunicationExists;
+                }
+            }
+
+            //check if participant01 and participant02 are identical
+            if (part1.getName().equals(part2.getName()))
+            {
+                //return message for output area
+                String outputParticipantsEqual = part1.getName() + " and " + part2.getName() + " are identical - cannot create channel on itself";
+                System.out.println("--- " + outputParticipantsEqual);
+                return outputParticipantsEqual;
+            }
+
+            //create Object Channel and register Participants
+            Channel channel = new Channel(name);
+            channel.register(part1);
+            channel.register(part2);
+            DataStore.instance.addChannel(channel);
+
+            //save channel in database with message on gui
+            HSQLDB.instance.insertDataTableChannel(name, part1.getId(), part2.getId());
+
+            //return message for output area when channel is created
+            String outputSuccess = "channel" + name + " from " + part1.getName() + " and " + part2.getName() + " successfully created";
+            System.out.println("--- " + outputSuccess);
+            return outputSuccess;
+        }
+        catch (SQLException sqlException)
+        {
+            String exOutput = "[method createChannel in Commands] SQLException: " + sqlException.getMessage();
+            System.out.println(exOutput);
+            return exOutput;
+        }
     }
 
     public static String showChannel(){
         try
         {
-            //get all channel from database
+            //get all channels from database
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel");
             String output = "";
             while (resultSet.next())
@@ -149,7 +200,7 @@ public class Commands {
             }
             if (output.equals(""))
             {
-                output = "no channel are created by now.";
+                output = "no channels are created by now";
             }
             System.out.print("--- channel: \n" + output);
             return output;
@@ -173,13 +224,20 @@ public class Commands {
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
             if (resultSet.next())
             {
-                HSQLDB.instance.deleteRows("DELETE FROM channel WHERE name = '" + name + "'");
+                HSQLDB.instance.updateCommand("DELETE FROM channel WHERE name = '" + name + "'");
                 output = "channel " + name + " deleted";
             }
             else
             {
                 output = "unknown channel " + name;
             }
+            //delete channel in ArrayList from DataStore
+            for (Channel c: DataStore.instance.getChannels()) {
+                if (c.getName().equals(name)) {
+                    DataStore.instance.getChannels().remove(c);
+                }
+            }
+
 
             return output;
         }
@@ -191,8 +249,44 @@ public class Commands {
         }
     }
 
-    public static String intrudeChannel(String name, Participant participant){
-        return "test";
+    public static String intrudeChannel(String name, ParticipantIntruder participant){
+
+        try {
+            //check if channel exists or not
+            ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
+            if (!resultSet1.next())
+            {
+                //return message for output area when channel does not exist
+                String outputNotExist = "channel " + name + " does not exist";
+                System.out.println("--- " + outputNotExist);
+                return outputNotExist;
+            }
+
+            //register ParticipantIntruder for Channel
+            for (Channel c: DataStore.instance.getChannels()) {
+                if (c.getName().equals(name))
+                {
+                    c.register(participant);
+                    //return message for output area when participant registered for channel
+                    String outputSuccess = "channel " + name + " intruded by participant " + participant.getName();
+                    System.out.println("--- " + outputSuccess);
+                    return outputSuccess;
+                }
+            }
+
+            //return message for output area when this part is reached
+            String outputError = "ERROR: object of channel " + name + " not in ArrayList channels in DataStore";
+            System.out.println("--- " + outputError);
+            return outputError;
+
+
+        }
+        catch (SQLException sqlException)
+        {
+            String exOutput = "[method intrudeChannel in Commands] SQLException: " + sqlException.getMessage();
+            System.out.println(exOutput);
+            return exOutput;
+        }
     }
 
     public static String sendMessage(String message, String part1, String part2, String algorithm, String keyFileName){
@@ -236,10 +330,10 @@ public class Commands {
             int unixTimeStampSeconds = (int) (System.currentTimeMillis() / 1000L); //only works until 2038
             HSQLDB.instance.insertDataTableMessages(participant01.getId(), participant02.getId(), message, algorithmID, encryptedMessage, keyFileName, unixTimeStampSeconds);
 
-            participant01.sendMessage(participant02, new Message(encryptedMessage, algorithm, participant01.getId()), getKeyFileFromFileName(keyFileName));
+            participant01.sendMessage(participant02, new Message(encryptedMessage, algorithm, participant01.getId(), unixTimeStampSeconds), getKeyFileFromFileName(keyFileName));
 
             //return message for output area
-            String outputSuccess = "message sent from participant" + part1 + "to participant " + part2;
+            String outputSuccess = "message sent from participant " + part1 + " to participant " + part2;
             System.out.println("--- " + outputSuccess);
             return outputSuccess;
         }

@@ -385,6 +385,19 @@ public enum HSQLDB {
         update(sqlStringBuilder.toString());
     }
 
+    public int insertDataTablePostboxInt(int partFrom, String partName, String message, int unixTimeStamp) {
+        int nextID = getNextID("postbox_" + partName) + 1;
+        StringBuilder sqlStringBuilder = new StringBuilder();
+        sqlStringBuilder.append("INSERT INTO postbox_").append(partName).append(" (").append("id").append(",").append("participant_from_id")
+                .append(",").append("message").append(",").append("timestamp").append(")");
+        sqlStringBuilder.append(" VALUES ");
+        sqlStringBuilder.append("(").append(nextID).append(",").append(partFrom).append(",").append("'").append(message).append("'").append(",").append(unixTimeStamp);
+        sqlStringBuilder.append(")");
+        System.out.println("sqlStringBuilder : " + sqlStringBuilder.toString());
+        update(sqlStringBuilder.toString());
+        return nextID;
+    }
+
     //endregion
 
     public ResultSet getDataFromManualSQL(String sqlStatement){
@@ -411,11 +424,16 @@ public enum HSQLDB {
         return resultSet.getNString("id");
     }
 
-    public void deleteRows(String sqlStatement)
+    public void updateCommand(String sqlStatement)
     {
         try {
             Statement statement = connection.createStatement();
             int result = statement.executeUpdate(sqlStatement);
+
+            if (result == -1) {
+                System.out.println("error executing " + sqlStatement);
+            }
+
             statement.close();
 
         } catch (SQLException sqlException) {
