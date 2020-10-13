@@ -10,19 +10,20 @@ import java.net.URLClassLoader;
 
 public class ComponentLoader {
 
-    private Class clazz;
-    private Object instance;
-    private Object port;
-    private String nameOfJavaArchive;
-    private String pathToFile;
-    private String nameOfClass = "CaesarCipher";
+    protected Class clazz;
+    protected Object instance;
+    protected Object port;
+    protected String nameOfJavaArchive;
+    protected String pathToFile;
+    protected String nameOfClass;
 
-    public ComponentLoader(String algorithm){
-        this.nameOfJavaArchive = algorithm+".jar";
-        this.pathToFile = Configuration.instance.componentDirectory+Configuration.instance.fileSeparator+nameOfJavaArchive;
+    public ComponentLoader(String nameOfJavaArchive, String nameOfClass){
+        this.nameOfJavaArchive = nameOfJavaArchive+".jar";
+        this.pathToFile = Configuration.instance.componentDirectory+Configuration.instance.fileSeparator+this.nameOfJavaArchive;
+        this.nameOfClass = nameOfClass;
     }
 
-    private void loadClazzFromJavaArchive() {
+    protected void loadClazzFromJavaArchive() {
         try {
             URL[] urls = {new File(pathToFile).toURI().toURL()};
             URLClassLoader urlClassLoader = new URLClassLoader(urls,ComponentLoader.class.getClassLoader());
@@ -33,7 +34,7 @@ public class ComponentLoader {
         }
     }
 
-    private void provideInstanceOfClass() {
+    protected void provideInstanceOfClass() {
         try {
             instance = clazz.getMethod("getInstance",new Class[0]).invoke(null,new Object[0]);
         } catch (Exception e) {
@@ -41,7 +42,7 @@ public class ComponentLoader {
         }
     }
 
-    private void provideComponentPort() {
+    protected void provideComponentPort() {
         try {
             port = clazz.getDeclaredField("port").get(instance);
             }
@@ -50,33 +51,5 @@ public class ComponentLoader {
         }
     }
 
-    public String executeEncryptMethod(String plainMessage, File keyFile){
-        loadClazzFromJavaArchive();
-        provideInstanceOfClass();
-        provideComponentPort();
-        try {
-            Method method = port.getClass().getMethod("encrypt", String.class, File.class);
-            String result = (String)method.invoke(port, plainMessage, keyFile);
-            return result;
-            }
-        catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 
-    public String executeDecryptMethod(String encryptedMessage, File keyFile){
-        loadClazzFromJavaArchive();
-        provideInstanceOfClass();
-        provideComponentPort();
-        try {
-            Method method = port.getClass().getMethod("decrypt", String.class, File.class);
-            String result = (String)method.invoke(port, encryptedMessage, keyFile);
-            return result;
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
 }

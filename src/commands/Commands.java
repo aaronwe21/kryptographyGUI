@@ -42,17 +42,46 @@ public class Commands {
 
     public static String encryptMessage(String message, String algorithm, String filename){
         Log log = null;
+
         if (Configuration.instance.getDebugModeActive()){
             log = new Log(LogOperationType.encrypt, algorithm);
         }
 
+        printInfo("EncryptMessage-Method entered with the following parameters:", log);
+        printInfo("Message: "+message, log);
+        printInfo("Algorithm: "+algorithm, log);
+        printInfo("Filename of Keyfile: "+filename+"\n", log);
+
+
         File keyFile = getKeyFileFromFileName(filename);
-        ComponentLoader shiftLoader = new ComponentLoader(algorithm);
-        String ciffre = shiftLoader.executeEncryptMethod(message, keyFile);
+        printInfo("Created File-Object for Keyfile\n",log);
+
+        String nameOfClass = algorithm.substring(0,1).toUpperCase();
+        if(algorithm.length()>1){
+            nameOfClass += algorithm.substring(1);
+        }
+
+        if(algorithm.equals("rsa")){
+            nameOfClass = "RSA";
+        }
+
+        printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
+
+        // THIS IF CAN BE DELETED IF CLASS WAS RENAMED TO "Shift"  <------------------------------------------
+        if(algorithm.equals("shift")){
+            nameOfClass = "CaesarCipher";
+        }
 
 
+        AlgorithmLoader algorithmLoader = new AlgorithmLoader(algorithm, nameOfClass);
+        printInfo("Imported algorithm!",log);
+        String encryptedMessage = algorithmLoader.executeEncryptMethod(message, keyFile);
+        printInfo("Message encryption with "+algorithm+" completed!\n",log);
 
-        return "test";
+        printInfo("Encrypted message: "+encryptedMessage+"\n",log);
+
+
+        return encryptedMessage;
     }
 
     public static String decryptMessage(String message, String algorithm, String filename){
@@ -60,7 +89,41 @@ public class Commands {
         if (Configuration.instance.getDebugModeActive()){
             log = new Log(LogOperationType.decrypt, algorithm);
         }
-        return "test";
+        printInfo("DecryptMessage-Method entered with the following parameters:", log);
+        printInfo("Encrypted Message: "+message, log);
+        printInfo("Algorithm: "+algorithm, log);
+        printInfo("Filename of Keyfile: "+filename+"\n", log);
+
+
+        File keyFile = getKeyFileFromFileName(filename);
+        printInfo("Created File-Object for Keyfile\n",log);
+
+        String nameOfClass = algorithm.substring(0,1).toUpperCase();
+        if(algorithm.length()>1){
+            nameOfClass += algorithm.substring(1);
+        }
+
+        if(algorithm.equals("rsa")){
+            nameOfClass = "RSA";
+        }
+
+        printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
+
+        // THIS IF CAN BE DELETED IF CLASS WAS RENAMED TO "Shift"  <------------------------------------------
+        if(algorithm.equals("shift")){
+            nameOfClass = "CaesarCipher";
+        }
+
+
+        AlgorithmLoader algorithmLoader = new AlgorithmLoader(algorithm, nameOfClass);
+        printInfo("Imported algorithm!",log);
+        String decryptedMessage = algorithmLoader.executeDecryptMethod(message, keyFile);
+        printInfo("Message decryption with "+algorithm+" completed!\n",log);
+
+        printInfo("Decrypted message: "+decryptedMessage+"\n",log);
+
+
+        return decryptedMessage;
     }
 
     private static void printInfo(String text, Log log){

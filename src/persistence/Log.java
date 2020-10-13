@@ -20,6 +20,7 @@ public class Log {
 
         try{
             logfile.createNewFile();
+            addLineToLog("Logfile with filename: "+filename+" created.\n");
             System.out.println("Logfile with filename: "+filename+" created.");
         }
         catch (IOException e){
@@ -74,6 +75,7 @@ public class Log {
                     Long unixSeconds = Long.parseLong(splittedFilename[splittedFilename.length -1].replace(".txt", ""));
                     if (unixSeconds>currentHighestUnixSeconds){
                         newestFile = logFiles[i];
+                        currentHighestUnixSeconds = unixSeconds;
                     }
                 }
             }
