@@ -3,9 +3,7 @@ package persistence;
 import commands.Commands;
 import configuration.Configuration;
 import javafx.scene.web.HTMLEditorSkin;
-import network.ParticipantIntruder;
-import network.ParticipantNormal;
-import network.ParticipantType;
+import network.*;
 
 import javax.xml.crypto.Data;
 import java.sql.*;
@@ -195,16 +193,7 @@ public enum HSQLDB {
         sqlStringBuilder.append("(").append(nextID).append(",").append("'").append(name).append("'").append(",").append(typeID);
         sqlStringBuilder.append(")");
         System.out.println("sqlStringBuilder : " + sqlStringBuilder.toString());
-        if(typeID == 1)
-        {
-            DataStore.instance.addParticipant(new ParticipantNormal(nextID, name));
-        }
-        else
-        {
-            DataStore.instance.addParticipant(new ParticipantIntruder(nextID, name));
-        }
         update(sqlStringBuilder.toString());
-
     }
 
     //endregion
@@ -457,6 +446,7 @@ public enum HSQLDB {
 
             DataStore.instance.getChannels().clear();
             DataStore.instance.getParticipants().clear();
+
 
             createTableAlgorithms();
             createTableTypes();

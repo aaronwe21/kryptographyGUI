@@ -15,6 +15,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import network.Channel;
+import network.Participant;
+import persistence.DataStore;
 import persistence.Log;
 import persistence.HSQLDB;
 
@@ -98,7 +101,7 @@ public class GUI extends Application {
 
         HSQLDB.instance.setupConnection();
 
-        HSQLDB.instance.resetDatabase();
+        //HSQLDB.instance.resetDatabase();
 
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {

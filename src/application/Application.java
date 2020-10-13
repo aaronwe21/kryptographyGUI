@@ -5,7 +5,7 @@ import persistence.HSQLDB;
 public class Application {
     public static void main(String... args) {
         // hsqldb demo
-        HSQLDB.instance.setupConnection();
+        /*HSQLDB.instance.setupConnection();
 
         HSQLDB.instance.dropTableParticipants();
         HSQLDB.instance.dropTableTypes();
@@ -24,6 +24,6 @@ public class Application {
         HSQLDB.instance.insertDataTableParticipants("msa", 2);
 
 
-        HSQLDB.instance.shutdown();
+        HSQLDB.instance.shutdown();*/
     }
 }
