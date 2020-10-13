@@ -7,6 +7,7 @@ import persistence.HSQLDB;
 import persistence.Log;
 import persistence.LogOperationType;
 
+import javax.xml.crypto.Data;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import com.google.common.eventbus.EventBus;
 
 public class Commands {
 
@@ -142,16 +144,16 @@ public class Commands {
 
         try {
             //check if name already exists in table participants
-            ResultSet nameExists = HSQLDB.instance.getDataFromManualSQL("SELECT COUNT(id) FROM participants WHERE name = '" + name + "'");
+            ResultSet nameExists = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM participants WHERE name = '" + name + "'");
             if (nameExists.next())
             {
-                String output = "participant" + name + "already exists, using existing postbox_" + name;
+                String output = "participant " + name + " already exists, using existing postbox_" + name;
                 System.out.println("--- " + output);
                 return output;
             }
 
             //get id from type from table types
-            ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM types WHERE type = '" + type.toString() + "'");
+            ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM types WHERE name = '" + type.toString() + "'");
             int typeID = 0;
             if (resultSet.next()) {
                 typeID = resultSet.getInt("id");
@@ -176,7 +178,7 @@ public class Commands {
                 DataStore.instance.addParticipant(new ParticipantIntruder(partID, name));
             }
 
-            String outputSuccess = "participant" + name + "with type " + type.toString() + " registered and postbox_" + name + " created";
+            String outputSuccess = "participant " + name + " with type " + type.toString() + " registered and postbox_" + name + " created";
             System.out.println("--- " + outputSuccess);
             return outputSuccess;
 
@@ -190,9 +192,18 @@ public class Commands {
 
     }
 
-    public static String createChannel(String name, Participant part1, Participant part2){
+    public static String createChannel(String name, ParticipantNormal part1, ParticipantNormal part2){
 
         try {
+            //check if one participant is null
+            if (part1 == null || part2 == null)
+            {
+                //return message for output area
+                String outputPartNull = "a parameter (participant) is null";
+                System.out.println("--- " + outputPartNull);
+                return outputPartNull;
+            }
+
             //check if channel exists or not
             ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
             if (resultSet1.next())

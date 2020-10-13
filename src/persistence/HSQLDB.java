@@ -1,11 +1,15 @@
 package persistence;
 
+import commands.Commands;
 import configuration.Configuration;
+import javafx.scene.web.HTMLEditorSkin;
 import network.ParticipantIntruder;
 import network.ParticipantNormal;
+import network.ParticipantType;
 
 import javax.xml.crypto.Data;
 import java.sql.*;
+import java.util.ArrayList;
 
 public enum HSQLDB {
     instance;
@@ -364,7 +368,7 @@ public enum HSQLDB {
         update(sqlStringBuilder01.toString());
 
         StringBuilder sqlStringBuilder02 = new StringBuilder();
-        sqlStringBuilder02.append("ALTER TABLE participants ADD CONSTRAINT fkPostbox").append(partName).append("01 ");
+        sqlStringBuilder02.append("ALTER TABLE postbox_").append(partName).append(" ADD CONSTRAINT fkPostbox").append(partName).append("01 ");
         sqlStringBuilder02.append("FOREIGN KEY (participant_from_id) ");
         sqlStringBuilder02.append("REFERENCES participants (id) ");
         sqlStringBuilder02.append("ON DELETE CASCADE");
@@ -414,11 +418,6 @@ public enum HSQLDB {
         }
     }
 
-    public void resetDatabase()
-    {
-        getDataFromManualSQL("SELECT TABLE_NAME FROM INFORMATION_SCHEMA");
-    }
-
     public String getParticipantNameByID(int id) throws SQLException {
         ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT name FROM participants WHERE id = " + id);
         return resultSet.getNString("id");
@@ -440,6 +439,61 @@ public enum HSQLDB {
             System.out.println(sqlException.getMessage());
         }
     }
+
+    public void resetDatabase()
+    {
+        try {
+            ArrayList<String> partNames = new ArrayList<>();
+            ResultSet resultSet = getDataFromManualSQL("SELECT name FROM participants");
+
+            while (resultSet.next()) {
+                dropTablePostbox(resultSet.getNString("name"));
+            }
+            dropTableMessages();
+            dropTableChannel();
+            dropTableParticipants();
+            dropTableAlgorithms();
+            dropTableTypes();
+
+            DataStore.instance.getChannels().clear();
+            DataStore.instance.getParticipants().clear();
+
+            createTableAlgorithms();
+            createTableTypes();
+            createTableParticipants();
+            createTableChannel();
+            createTableMessages();
+
+
+            HSQLDB.instance.insertDataTableAlgorithms("shift");
+            HSQLDB.instance.insertDataTableAlgorithms("rsa");
+
+            HSQLDB.instance.insertDataTableTypes("normal");
+            HSQLDB.instance.insertDataTableTypes("intruder");
+
+            Commands.registerParticipant("branch_hkg", ParticipantType.normal);
+            Commands.registerParticipant("branch_cpt", ParticipantType.normal);
+            Commands.registerParticipant("branch_sfo", ParticipantType.normal);
+            Commands.registerParticipant("branch_syd", ParticipantType.normal);
+            Commands.registerParticipant("branch_wuh", ParticipantType.normal);
+            Commands.registerParticipant("msa", ParticipantType.intruder);
+
+
+            Commands.createChannel("hkg_wuh", (ParticipantNormal)DataStore.instance.getParticipant("branch_hkg"), (ParticipantNormal)DataStore.instance.getParticipant("branch_wuh"));
+            Commands.createChannel("hkg_cpt", (ParticipantNormal)DataStore.instance.getParticipant("branch_hkg"), (ParticipantNormal)DataStore.instance.getParticipant("branch_cpt"));
+            Commands.createChannel("cpt_syd", (ParticipantNormal)DataStore.instance.getParticipant("branch_cpt"), (ParticipantNormal)DataStore.instance.getParticipant("branch_syd"));
+            Commands.createChannel("syd_sfo", (ParticipantNormal)DataStore.instance.getParticipant("branch_syd"), (ParticipantNormal)DataStore.instance.getParticipant("branch_sfo"));
+
+
+        }
+        catch (SQLException sqlException)
+        {
+            System.out.println("[Exception in resetDatabase] " + sqlException.getMessage());
+        }
+
+
+    }
+
 
     public void shutdown() {
         System.out.println("--- shutdown");

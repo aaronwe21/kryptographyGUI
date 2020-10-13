@@ -18,6 +18,10 @@ import javafx.stage.WindowEvent;
 import persistence.Log;
 import persistence.HSQLDB;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 public class GUI extends Application {
     public void start(Stage primaryStage) {
         primaryStage.setTitle("MSA | Mosbach Security Agency");
@@ -94,11 +98,15 @@ public class GUI extends Application {
 
         HSQLDB.instance.setupConnection();
 
+        HSQLDB.instance.resetDatabase();
+
+
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent windowEvent) {
                 HSQLDB.instance.shutdown();
             }
         });
+
     }
 }
