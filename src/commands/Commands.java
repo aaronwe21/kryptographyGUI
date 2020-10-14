@@ -192,17 +192,37 @@ public class Commands {
 
     }
 
-    public static String createChannel(String name, ParticipantNormal part1, ParticipantNormal part2){
-
+    public static String createChannel(String name, String part1Name, String part2Name){
         try {
-            //check if one participant is null
-            if (part1 == null || part2 == null)
+
+            //check if participants are of type normal
+            Participant participant1 = DataStore.instance.getParticipantByName(part1Name);
+            Participant participant2 = DataStore.instance.getParticipantByName(part2Name);
+            ParticipantNormal part1;
+            ParticipantNormal part2;
+            if (participant1 instanceof ParticipantNormal)
             {
-                //return message for output area
-                String outputPartNull = "a parameter (participant) is null";
-                System.out.println("--- " + outputPartNull);
-                return outputPartNull;
+                part1 = (ParticipantNormal)participant1;
+                if (participant2 instanceof ParticipantNormal)
+                {
+                    part2 = (ParticipantNormal)participant2;
+                }
+                else
+                {
+                    //return message for output area when participant2 not of type normal
+                    String outputFalseType = "participant " + part2Name + " not of type normal";
+                    System.out.println("--- " + outputFalseType);
+                    return outputFalseType;
+                }
             }
+            else
+            {
+                //return message for output area when participant1 not of type normal
+                String outputFalseType = "participant " + part1Name + " not of type normal";
+                System.out.println("--- " + outputFalseType);
+                return outputFalseType;
+            }
+
 
             //check if channel exists or not
             ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
@@ -243,6 +263,10 @@ public class Commands {
             channel.register(part1);
             channel.register(part2);
             DataStore.instance.addChannel(channel);
+
+            //add channel to ArrayList from Participants
+            part1.addChannel(channel);
+            part2.addChannel(channel);
 
             //save channel in database with message on gui
             HSQLDB.instance.insertDataTableChannel(name, part1.getId(), part2.getId());
@@ -323,9 +347,24 @@ public class Commands {
         }
     }
 
-    public static String intrudeChannel(String name, ParticipantIntruder participant){
+    public static String intrudeChannel(String name, String participantName){
 
         try {
+            //check if participant is of type intruder
+            Participant part = DataStore.instance.getParticipantByName(participantName);
+            ParticipantIntruder participant;
+            if (part instanceof ParticipantIntruder)
+            {
+                participant = (ParticipantIntruder)part;
+            }
+            else
+            {
+                //return message for output area when participant not of type intruder
+                String outputFalseType = "participant " + participantName + " not of type intruder";
+                System.out.println("--- " + outputFalseType);
+                return outputFalseType;
+            }
+
             //check if channel exists or not
             ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
             if (!resultSet1.next())

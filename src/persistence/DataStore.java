@@ -45,10 +45,20 @@ public enum DataStore {
         }
     }
 
-    public Participant getParticipant(String name)
-    {
+    public Participant getParticipantByName(String name) {
         for (Participant p : participants) {
             if (p.getName().equals(name))
+            {
+                return p;
+            }
+        }
+
+        return null;
+    }
+
+    public Participant getParticipantByID(int id) {
+        for (Participant p : participants) {
+            if (p.getId() == id)
             {
                 return p;
             }

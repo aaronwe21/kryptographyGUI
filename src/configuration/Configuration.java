@@ -1,5 +1,7 @@
 package configuration;
 
+import gui.GUI;
+
 public enum Configuration {
     instance;
 
@@ -13,6 +15,8 @@ public enum Configuration {
     public final String driverName = "jdbc:hsqldb:";
     public final String username = "sa";
     public final String password = "";
+
+    public GUI gui;
 
     // component
     public String componentDirectory = userDirectory + fileSeparator + "component";
@@ -33,4 +37,6 @@ public enum Configuration {
     public boolean getDebugModeActive(){
         return debugModeActive;
     }
+
+
 }

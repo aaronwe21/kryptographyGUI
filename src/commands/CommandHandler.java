@@ -40,7 +40,7 @@ public class CommandHandler {
         }
         if(inputCommand.matches("show channel"))
         {
-            return "NOT IMPLEMENTED YET";//Commands.showChannel();
+            return "NOT IMPLEMENTED YET"; //Commands.showChannel();
         }
         if(inputCommand.matches("drop channel .+"))
         {
