@@ -1,6 +1,9 @@
 package network;
 
 import com.google.common.eventbus.Subscribe;
+import commands.Commands;
+import configuration.Configuration;
+import gui.GUI;
 import persistence.DataStore;
 import persistence.HSQLDB;
 
@@ -25,9 +28,14 @@ public class ParticipantNormal extends Participant {
     public void receiveMessage(Message message) {
         if(this.id != message.getParticipantFromID())
         {
-            //encryptMessage
+            //decryptMessage
+            String decryptedMessage = Commands.decryptMessage(message.getEncryptedMessage(), message.getAlgorithmType(), key.getName());
             //write message in database table postbox_[participant_name]
+            HSQLDB.instance.insertDataTablePostbox(message.getParticipantFromID(), this.name, decryptedMessage, message.getUnixTimeStamp());
             //write message "[participant_name] received new message]" in GUI output area
+            String outputText = this.name + " received new message";
+            System.out.println("--- " + outputText);
+            Configuration.instance.gui.writeTextToOutputArea(outputText);
         }
     }
 
@@ -41,8 +49,7 @@ public class ParticipantNormal extends Participant {
         this.channels.add(channel);
     }
 
-    public void removeChannel(Channel channel)
-    {
+    public void removeChannel(Channel channel) {
         if (channels.contains(channel))
         {
             channels.remove(channel);

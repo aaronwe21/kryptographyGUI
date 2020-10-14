@@ -311,7 +311,8 @@ public enum HSQLDB {
     public void insertDataTableMessages(int partFrom, int partTo, String plainMessage, int algorithmID, String encryptedMessage, String keyFile, int unixTimeStamp) {
         int nextID = getNextID("messages") + 1;
         StringBuilder sqlStringBuilder = new StringBuilder();
-        sqlStringBuilder.append("INSERT INTO messages (").append("id").append(",").append("participant_from_id").append(",").append("participant_to_id")
+        sqlStringBuilder.append("INSERT INTO messages (").append("id").append(",")
+                .append("participant_from_id").append(",").append("participant_to_id")
                 .append(",").append("plain_message").append(",").append("algorithm_id").append(",").append("encrypted_message")
                 .append(",").append("keyfile").append(",").append("timestamp").append(")");
         sqlStringBuilder.append(" VALUES ");
@@ -412,8 +413,7 @@ public enum HSQLDB {
         return resultSet.getNString("id");
     }
 
-    public void updateCommand(String sqlStatement)
-    {
+    public void updateCommand(String sqlStatement) {
         try {
             Statement statement = connection.createStatement();
             int result = statement.executeUpdate(sqlStatement);
@@ -429,10 +429,8 @@ public enum HSQLDB {
         }
     }
 
-    public void resetDatabase()
-    {
+    public void resetDatabase() {
         try {
-            ArrayList<String> partNames = new ArrayList<>();
             ResultSet resultSet = getDataFromManualSQL("SELECT name FROM participants");
 
             while (resultSet.next()) {
@@ -469,10 +467,10 @@ public enum HSQLDB {
             Commands.registerParticipant("msa", ParticipantType.intruder);
 
 
-            Commands.createChannel("hkg_wuh", (ParticipantNormal)DataStore.instance.getParticipant("branch_hkg"), (ParticipantNormal)DataStore.instance.getParticipant("branch_wuh"));
-            Commands.createChannel("hkg_cpt", (ParticipantNormal)DataStore.instance.getParticipant("branch_hkg"), (ParticipantNormal)DataStore.instance.getParticipant("branch_cpt"));
-            Commands.createChannel("cpt_syd", (ParticipantNormal)DataStore.instance.getParticipant("branch_cpt"), (ParticipantNormal)DataStore.instance.getParticipant("branch_syd"));
-            Commands.createChannel("syd_sfo", (ParticipantNormal)DataStore.instance.getParticipant("branch_syd"), (ParticipantNormal)DataStore.instance.getParticipant("branch_sfo"));
+            Commands.createChannel("hkg_wuh", "branch_hkg", "branch_wuh");
+            Commands.createChannel("hkg_cpt", "branch_hkg", "branch_cpt");
+            Commands.createChannel("cpt_syd", "branch_cpt", "branch_syd");
+            Commands.createChannel("syd_sfo", "branch_syd", "branch_sfo");
 
 
         }
@@ -482,6 +480,48 @@ public enum HSQLDB {
         }
 
 
+    }
+
+    public void loadDatabase() {
+        try {
+            //get all participants and channels in Database
+            ResultSet resultSetPart = getDataFromManualSQL("SELECT * FROM participants");
+            ResultSet resultSetChannels = getDataFromManualSQL("SELECT * FROM channel");
+
+            //create objects of Participant
+            while (resultSetPart.next())
+            {
+                if (resultSetPart.getInt("type_id") == 1)
+                {
+                    DataStore.instance.addParticipant(new ParticipantNormal(resultSetPart.getInt("id"), resultSetPart.getNString("name")));
+                }
+                else
+                {
+                    DataStore.instance.addParticipant(new ParticipantIntruder(resultSetPart.getInt("id"), resultSetPart.getNString("name")));
+                }
+            }
+
+            //create objects of Channel
+            while(resultSetChannels.next())
+            {
+                //create Object Channel and register Participants
+                Channel channel = new Channel(resultSetChannels.getNString("name"));
+                ParticipantNormal part1 = (ParticipantNormal)DataStore.instance.getParticipantByID(resultSetChannels.getInt("participant_01"));
+                ParticipantNormal part2 = (ParticipantNormal)DataStore.instance.getParticipantByID(resultSetChannels.getInt("participant_02"));
+
+                channel.register(part1);
+                channel.register(part2);
+                DataStore.instance.addChannel(channel);
+
+                //add channel to ArrayList from Participants
+                part1.addChannel(channel);
+                part2.addChannel(channel);
+            }
+        }
+        catch (SQLException sqlException)
+        {
+            System.out.println("[Exception in resetDatabase] " + sqlException.getMessage());
+        }
     }
 
 

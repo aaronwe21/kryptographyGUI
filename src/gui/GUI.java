@@ -26,9 +26,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class GUI extends Application {
-    public void start(Stage primaryStage) {
+
+    private TextArea outputArea;
+
+    public void start(Stage primaryStage) throws SQLException {
         primaryStage.setTitle("MSA | Mosbach Security Agency");
 
+        Configuration.instance.gui = this;
         HBox hBox = new HBox();
         hBox.setPadding(new Insets(15, 12, 15, 12));
         hBox.setSpacing(10);
@@ -45,7 +49,7 @@ public class GUI extends Application {
         TextArea commandLineArea = new TextArea();
         commandLineArea.setWrapText(true);
 
-        TextArea outputArea = new TextArea();
+        outputArea = new TextArea();
         outputArea.setWrapText(true);
         outputArea.setEditable(false);
 
@@ -95,20 +99,35 @@ public class GUI extends Application {
             }
         });
 
+
+
         primaryStage.setScene(scene);
         primaryStage.show();
 
-
+        //connect to database
         HSQLDB.instance.setupConnection();
+        //create objects of participants and channels
+        HSQLDB.instance.loadDatabase();
 
+
+        ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM messages");
+        ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM postbox_branch_wuh");
+        
         //HSQLDB.instance.resetDatabase();
 
 
+
+        //close connection to database when window is closing
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent windowEvent) {
                 HSQLDB.instance.shutdown();
             }
         });
+    }
+
+    public void writeTextToOutputArea(String text)
+    {
+        outputArea.setText(text);
     }
 }
