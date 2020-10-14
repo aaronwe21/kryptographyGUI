@@ -15,8 +15,15 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import network.Channel;
+import network.Participant;
+import persistence.DataStore;
 import persistence.Log;
 import persistence.HSQLDB;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class GUI extends Application {
     public void start(Stage primaryStage) {
@@ -94,11 +101,15 @@ public class GUI extends Application {
 
         HSQLDB.instance.setupConnection();
 
+        //HSQLDB.instance.resetDatabase();
+
+
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent windowEvent) {
                 HSQLDB.instance.shutdown();
             }
         });
+
     }
 }

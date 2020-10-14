@@ -44,4 +44,16 @@ public enum DataStore {
             channels.remove(channel);
         }
     }
+
+    public Participant getParticipant(String name)
+    {
+        for (Participant p : participants) {
+            if (p.getName().equals(name))
+            {
+                return p;
+            }
+        }
+
+        return null;
+    }
 }
