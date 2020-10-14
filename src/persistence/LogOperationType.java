@@ -1,5 +1,5 @@
 package persistence;
 
 public enum LogOperationType {
-    encrypt, decrypt
+    encrypt, decrypt, crack
 }

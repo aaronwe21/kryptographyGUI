@@ -1,5 +1,7 @@
 package commands;
 
+import cryptography.AlgorithmLoader;
+import cryptography.CrackerLoader;
 import network.*;
 import configuration.Configuration;
 import persistence.DataStore;
@@ -7,15 +9,13 @@ import persistence.HSQLDB;
 import persistence.Log;
 import persistence.LogOperationType;
 
-import javax.xml.crypto.Data;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import com.google.common.eventbus.EventBus;
+import java.util.concurrent.*;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 
 public class Commands {
 
@@ -126,8 +126,59 @@ public class Commands {
         }
     }
 
-    public static String crackEncryptedMessage(String message, String algorithm){
-        return "test";
+    public static String crackEncryptedMessage(String message, String algorithm, String filename){
+        Log log = null;
+        File keyFile = null;
+
+        if (Configuration.instance.getDebugModeActive()){
+            log = new Log(LogOperationType.crack, algorithm);
+        }
+        printInfo("CrackMessage-Method entered with the following parameters:", log);
+        printInfo("Message: "+message, log);
+        printInfo("Algorithm: "+algorithm, log);
+        if (filename != null){
+            printInfo("Filename of Keyfile: "+filename+"\n", log);
+            keyFile = getKeyFileFromFileName(filename);
+            printInfo("Created File-Object for Keyfile (contains public key)\n",log);
+        }
+
+        String nameOfClass = algorithm.substring(0,1).toUpperCase();
+        if(algorithm.length()>1){
+            nameOfClass += algorithm.substring(1);
+        }
+
+        if(algorithm.equals("rsa")){
+            nameOfClass = "RSA";
+        }
+        nameOfClass += "Cracker";
+
+        printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        String crackedMessage = null;
+        long startTime = System.currentTimeMillis( );
+
+
+        try {
+            if(keyFile !=null){
+                crackedMessage = executorService.submit(CrackerLoader.getCrackerCallable(algorithm,nameOfClass, message, keyFile)).get(Configuration.instance.secondsToCrack, SECONDS);
+            }
+            else{
+                crackedMessage = executorService.submit(CrackerLoader.getCrackerCallable(algorithm,nameOfClass, message)).get(Configuration.instance.secondsToCrack, SECONDS);
+            }
+
+        } catch (TimeoutException | InterruptedException | ExecutionException e) {
+            printInfo("Cracking took longer than "+ Configuration.instance.secondsToCrack +" seconds and is terminated!\n", log);
+        }
+        long endTime = System.currentTimeMillis( );
+        executorService.shutdownNow();
+
+        if (crackedMessage != null){
+            printInfo("Cracking message with "+algorithm+"_cracker was successful and took " +Long.toString(endTime - startTime) + " ms.",log);
+            printInfo("Decrypted/Cracked message: "+crackedMessage,log);
+            return crackedMessage;
+        }
+        return "cracking encrypted message \""+message+"\" failed";
     }
 
     public static String registerParticipant(String name, ParticipantType type) {

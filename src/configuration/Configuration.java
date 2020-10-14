@@ -16,6 +16,7 @@ public enum Configuration {
 
     // component
     public String componentDirectory = userDirectory + fileSeparator + "component";
+    public final int secondsToCrack = 30;
 
     // log
     public String logDirectory = userDirectory + fileSeparator + "log";

@@ -1,4 +1,4 @@
-package commands;
+package cryptography;
 
 import java.io.File;
 import java.lang.reflect.Method;
