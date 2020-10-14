@@ -1,5 +1,6 @@
 package commands;
 
+import network.ParticipantNormal;
 import network.ParticipantType;
 
 public class CommandHandler {
@@ -36,22 +37,22 @@ public class CommandHandler {
         {
             String channelName = extractChannelNameFromCommand(inputCommand);
             String [] participantNames = extractTwoParticipantsFromCommand(inputCommand);
-            return "NOT IMPLEMENTED YET!"; //Commands.createChannel(channelName, participantNames[0], );
+            return Commands.createChannel(channelName, participantNames[0], participantNames[1]);
         }
         if(inputCommand.matches("show channel"))
         {
-            return "NOT IMPLEMENTED YET";//Commands.showChannel();
+            Commands.showChannel();
         }
         if(inputCommand.matches("drop channel .+"))
         {
             String channelName = extractChannelNameFromCommand(inputCommand);
-            return channelName;
+            return Commands.dropChannel(channelName);
         }
         if(inputCommand.matches("intrude channel .+ by .+"))
         {
             String channelName = extractChannelNameFromCommand(inputCommand);
             String participantName = extractOneParticipantFromCommand(inputCommand);
-            return channelName;
+            return Commands.intrudeChannel(channelName, participantName);
         }
         if(inputCommand.matches("send message \".+\" from .+ to .+ using .+ and keyfile .+\\.json"))
         {
@@ -59,7 +60,7 @@ public class CommandHandler {
             String [] participantNames = extractTwoParticipantsFromCommand(inputCommand);
             String algorithm = extractAlgorithmFromCommand(inputCommand);
             String filename = extractKeyFileNameFromCommand(inputCommand);
-            return inputCommand;
+            return Commands.sendMessage(message, participantNames[0], participantNames[1],algorithm, filename);
         }
         return "Invalid command entered!";
     }

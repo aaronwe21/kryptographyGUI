@@ -110,6 +110,5 @@ public class GUI extends Application {
                 HSQLDB.instance.shutdown();
             }
         });
-
     }
 }
