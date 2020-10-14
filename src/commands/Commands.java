@@ -70,11 +70,6 @@ public class Commands {
 
         printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
 
-        // THIS IF CAN BE DELETED IF CLASS WAS RENAMED TO "Shift"  <------------------------------------------
-        if(algorithm.equals("shift")){
-            nameOfClass = "CaesarCipher";
-        }
-
 
         AlgorithmLoader algorithmLoader = new AlgorithmLoader(algorithm, nameOfClass);
         printInfo("Imported algorithm!",log);
@@ -111,11 +106,6 @@ public class Commands {
         }
 
         printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
-
-        // THIS IF CAN BE DELETED IF CLASS WAS RENAMED TO "Shift"  <------------------------------------------
-        if(algorithm.equals("shift")){
-            nameOfClass = "CaesarCipher";
-        }
 
 
         AlgorithmLoader algorithmLoader = new AlgorithmLoader(algorithm, nameOfClass);

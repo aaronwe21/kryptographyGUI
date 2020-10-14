@@ -119,7 +119,6 @@ public class GUI extends Application {
                 HSQLDB.instance.shutdown();
             }
         });
-
     }
 
     public void writeTextToOutputArea(String text)
