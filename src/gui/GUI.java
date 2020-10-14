@@ -29,7 +29,7 @@ public class GUI extends Application {
 
     private TextArea outputArea;
 
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage) throws SQLException {
         primaryStage.setTitle("MSA | Mosbach Security Agency");
 
         Configuration.instance.gui = this;
@@ -101,8 +101,6 @@ public class GUI extends Application {
 
 
 
-
-
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -110,6 +108,13 @@ public class GUI extends Application {
         HSQLDB.instance.setupConnection();
         //create objects of participants and channels
         HSQLDB.instance.loadDatabase();
+
+
+        ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM messages");
+        ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM postbox_branch_wuh");
+        
+        //HSQLDB.instance.resetDatabase();
+
 
 
         //close connection to database when window is closing

@@ -311,7 +311,8 @@ public enum HSQLDB {
     public void insertDataTableMessages(int partFrom, int partTo, String plainMessage, int algorithmID, String encryptedMessage, String keyFile, int unixTimeStamp) {
         int nextID = getNextID("messages") + 1;
         StringBuilder sqlStringBuilder = new StringBuilder();
-        sqlStringBuilder.append("INSERT INTO messages (").append("id").append(",").append("participant_from_id").append(",").append("participant_to_id")
+        sqlStringBuilder.append("INSERT INTO messages (").append("id").append(",")
+                .append("participant_from_id").append(",").append("participant_to_id")
                 .append(",").append("plain_message").append(",").append("algorithm_id").append(",").append("encrypted_message")
                 .append(",").append("keyfile").append(",").append("timestamp").append(")");
         sqlStringBuilder.append(" VALUES ");

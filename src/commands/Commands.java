@@ -428,7 +428,7 @@ public class Commands {
             int algorithmID = 0;
             if (resultSet.next())
             {
-                resultSet.getInt("id");
+                algorithmID = resultSet.getInt("id");
             }
             int unixTimeStampSeconds = (int) (System.currentTimeMillis() / 1000L); //only works until 2038
             HSQLDB.instance.insertDataTableMessages(participant01.getId(), participant02.getId(), message, algorithmID, encryptedMessage, keyFileName, unixTimeStampSeconds);
