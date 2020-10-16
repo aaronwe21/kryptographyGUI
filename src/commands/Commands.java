@@ -12,6 +12,8 @@ import persistence.LogOperationType;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.*;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -316,7 +318,7 @@ public class Commands {
             HSQLDB.instance.insertDataTableChannel(name, part1.getId(), part2.getId());
 
             //return message for output area when channel is created
-            String outputSuccess = "channel" + name + " from " + part1.getName() + " and " + part2.getName() + " successfully created";
+            String outputSuccess = "channel " + name + " from " + part1.getName() + " and " + part2.getName() + " successfully created";
             System.out.println("--- " + outputSuccess);
             return outputSuccess;
         }
@@ -374,10 +376,9 @@ public class Commands {
                 output = "unknown channel " + name;
             }
             //delete channel in ArrayList from DataStore
-            for (Channel c: DataStore.instance.getChannels()) {
-                if (c.getName().equals(name)) {
-                    DataStore.instance.getChannels().remove(c);
-                }
+            Iterator<Channel> iterator = DataStore.instance.getChannels().iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().getName().equals(name)) iterator.remove();
             }
 
 

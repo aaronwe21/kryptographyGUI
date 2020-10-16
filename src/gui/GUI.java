@@ -111,7 +111,6 @@ public class GUI extends Application {
 
 
 
-
         //close connection to database when window is closing
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override

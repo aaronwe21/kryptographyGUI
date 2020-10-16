@@ -27,6 +27,7 @@ public class ParticipantIntruder extends Participant{
             crackedMessage = Commands.crackEncryptedMessage(message.getEncryptedMessage(), message.getAlgorithmType(), message.getRsaPublicKeyFile());
             //get name of participant_from
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT name FROM participants WHERE id = " + message.getParticipantFromID());
+            resultSet.next();
             String partFromName = resultSet.getNString("name");
             //message cracked or not
             if (crackedMessage.matches("cracking encrypted message \".+\" failed")) {

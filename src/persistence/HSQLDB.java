@@ -410,7 +410,8 @@ public enum HSQLDB {
 
     public String getParticipantNameByID(int id) throws SQLException {
         ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT name FROM participants WHERE id = " + id);
-        return resultSet.getNString("id");
+        resultSet.next();
+        return resultSet.getNString("name");
     }
 
     public void updateCommand(String sqlStatement) {
