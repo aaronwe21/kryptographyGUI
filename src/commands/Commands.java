@@ -19,6 +19,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class Commands {
 
+    public static String resetDatabase(){
+        HSQLDB.instance.resetDatabase();
+        return "Database reset complete!";
+    }
+
     public static String showAlgorithm(){
         File componentDirectory = new File(Configuration.instance.componentDirectory);
 
@@ -32,8 +37,6 @@ public class Commands {
                         String algorithmName = componentFiles[i].getName().replace(".jar","");
                         returnString += algorithmName;
                         returnString += " | ";
-
-                        // HIER GGF ALGORITHMEN IN DATENBANK EINFÜGEN JE NACHDEM WIE DAS IMPLEMENTIERT IST!
                     }
                 }
                 return returnString.substring(0,returnString.length()-3);
@@ -484,7 +487,8 @@ public class Commands {
             int unixTimeStampSeconds = (int) (System.currentTimeMillis() / 1000L); //only works until 2038
             HSQLDB.instance.insertDataTableMessages(participant01.getId(), participant02.getId(), message, algorithmID, encryptedMessage, keyFileName, unixTimeStampSeconds);
 
-            participant01.sendMessage(participant02, new Message(encryptedMessage, algorithm, participant01.getId(), unixTimeStampSeconds), getKeyFileFromFileName(keyFileName));
+            String rsaPublicKey = algorithm.equals("rsa") ? keyFileName : null;
+            participant01.sendMessage(participant02, new Message(encryptedMessage, algorithm, participant01.getId(), unixTimeStampSeconds, rsaPublicKey), getKeyFileFromFileName(keyFileName));
 
             //return message for output area
             String outputSuccess = "message sent from participant " + part1 + " to participant " + part2;

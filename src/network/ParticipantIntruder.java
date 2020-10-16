@@ -24,7 +24,7 @@ public class ParticipantIntruder extends Participant{
             int messageID = HSQLDB.instance.insertDataTablePostboxInt(message.getParticipantFromID(), this.name, "unknown", message.getUnixTimeStamp());
             //try to crack message
             String crackedMessage = "";
-            crackedMessage = Commands.crackEncryptedMessage(message.getEncryptedMessage(), message.getAlgorithmType());
+            crackedMessage = Commands.crackEncryptedMessage(message.getEncryptedMessage(), message.getAlgorithmType(), message.getRsaPublicKeyFile());
             //get name of participant_from
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT name FROM participants WHERE id = " + message.getParticipantFromID());
             String partFromName = resultSet.getNString("name");

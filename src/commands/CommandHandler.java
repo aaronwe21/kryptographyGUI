@@ -7,6 +7,9 @@ public class CommandHandler {
     public static String execute(String inputCommand)
     {
         inputCommand = inputCommand.trim();
+        if(inputCommand.equals("reset database")){
+            return Commands.resetDatabase();
+        }
         if(inputCommand.equals("show algorithm")){
             return Commands.showAlgorithm();
         }
@@ -23,10 +26,18 @@ public class CommandHandler {
             String filename = extractKeyFileNameFromCommand(inputCommand);
             return Commands.decryptMessage(message, algorithm, filename);
         }
-        if(inputCommand.matches("crack encrypted message \".+\" using .+")){
+        // Specification extended
+        if(inputCommand.matches("crack encrypted message \".+\" using .+([a-zA-Z0-9]| and keyfile .+\\.json)")){
             String message = extractMessageFromCommand(inputCommand);
             String algorithm = extractAlgorithmFromCommand(inputCommand);
-            return Commands.crackEncryptedMessage(message, algorithm);
+            String filename = null;
+            if (algorithm.equals("rsa")){
+                filename  = extractKeyFileNameFromCommand(inputCommand);
+                if (!filename.matches(".+\\.json")){
+                    return "Invalid command entered!";
+                }
+            }
+            return Commands.crackEncryptedMessage(message, algorithm, filename);
         }
         if(inputCommand.matches("register participant .+ with type (normal|intruder)")){
             String participantName = extractOneParticipantFromCommand(inputCommand);
@@ -41,7 +52,7 @@ public class CommandHandler {
         }
         if(inputCommand.matches("show channel"))
         {
-            Commands.showChannel();
+            return Commands.showChannel();
         }
         if(inputCommand.matches("drop channel .+"))
         {
@@ -74,7 +85,7 @@ public class CommandHandler {
     }
 
     private static String extractKeyFileNameFromCommand(String inputCommand) {
-        return inputCommand.replaceAll(".+ keyfile ", "");
+        return inputCommand.replaceAll(".+ keyfile ", "").replaceAll(".json.+", ".json");
     }
 
     private static String extractChannelNameFromCommand(String inputCommand){

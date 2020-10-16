@@ -21,7 +21,6 @@ public class CrackerLoader extends ComponentLoader{
 
         }
         catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }
@@ -36,7 +35,6 @@ public class CrackerLoader extends ComponentLoader{
             return result;
         }
         catch (Exception e) {
-            e.printStackTrace();
             return null;
         }
     }

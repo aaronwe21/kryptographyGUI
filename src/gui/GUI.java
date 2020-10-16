@@ -110,11 +110,6 @@ public class GUI extends Application {
         HSQLDB.instance.loadDatabase();
 
 
-        ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM messages");
-        ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM postbox_branch_wuh");
-        
-        //HSQLDB.instance.resetDatabase();
-
 
 
         //close connection to database when window is closing
