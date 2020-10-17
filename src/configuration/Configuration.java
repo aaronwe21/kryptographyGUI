@@ -31,11 +31,11 @@ public enum Configuration {
     // debug-mode
     private boolean debugModeActive = false;
 
-    public void changeDebugMode(){
+    public void changeDebugMode() {
         debugModeActive = !debugModeActive;
     }
 
-    public boolean getDebugModeActive(){
+    public boolean getDebugModeActive() {
         return debugModeActive;
     }
 

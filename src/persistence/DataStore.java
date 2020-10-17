@@ -19,36 +19,25 @@ public enum DataStore {
         return channels;
     }
 
-    public void addParticipant(Participant participant)
-    {
+    public void addParticipant(Participant participant) {
         participants.add(participant);
     }
 
-    public void removeParticipant(Participant participant)
-    {
-        if(participants.contains(participant))
-        {
-            participants.remove(participant);
-        }
+    public void removeParticipant(Participant participant) {
+        participants.remove(participant);
     }
 
-    public void addChannel(Channel channel)
-    {
+    public void addChannel(Channel channel) {
         channels.add(channel);
     }
 
-    public void removeChannel(Channel channel)
-    {
-        if (channels.contains(channel))
-        {
-            channels.remove(channel);
-        }
+    public void removeChannel(Channel channel) {
+        channels.remove(channel);
     }
 
     public Participant getParticipantByName(String name) {
         for (Participant p : participants) {
-            if (p.getName().equals(name))
-            {
+            if (p.getName().equals(name)) {
                 return p;
             }
         }
@@ -58,8 +47,7 @@ public enum DataStore {
 
     public Participant getParticipantByID(int id) {
         for (Participant p : participants) {
-            if (p.getId() == id)
-            {
+            if (p.getId() == id) {
                 return p;
             }
         }

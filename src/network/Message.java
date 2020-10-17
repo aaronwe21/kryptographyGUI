@@ -1,7 +1,5 @@
 package network;
 
-import java.io.File;
-
 public class Message {
 
     private String encryptedMessage;
@@ -10,8 +8,7 @@ public class Message {
     private int unixTimeStamp;
     private String rsaPublicKeyFile;
 
-    public Message (String encryptedMessage, String algorithmType, int participantFromID, int unixTimeStamp, String rsaPublicKeyFile)
-    {
+    public Message(String encryptedMessage, String algorithmType, int participantFromID, int unixTimeStamp, String rsaPublicKeyFile) {
         this.encryptedMessage = encryptedMessage;
         this.algorithmType = algorithmType;
         this.participantFromID = participantFromID;

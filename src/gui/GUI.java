@@ -15,15 +15,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import network.Channel;
-import network.Participant;
-import persistence.DataStore;
-import persistence.Log;
 import persistence.HSQLDB;
+import persistence.Log;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 public class GUI extends Application {
 
@@ -45,7 +40,6 @@ public class GUI extends Application {
         closeButton.setPrefSize(100, 20);
 
 
-
         TextArea commandLineArea = new TextArea();
         commandLineArea.setWrapText(true);
 
@@ -63,32 +57,34 @@ public class GUI extends Application {
 
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent keyEvent) {
-                if (keyEvent.getCode() == KeyCode.F3){
+                if (keyEvent.getCode() == KeyCode.F3) {
                     Configuration.instance.changeDebugMode();
-                    if (Configuration.instance.getDebugModeActive()){
+                    if (Configuration.instance.getDebugModeActive()) {
                         System.out.println("Debug mode activated!");
                         vbox.setStyle("-fx-background-color: #990000;");
-                    }
-                    else {
+                    } else {
                         System.out.println("Debug mode deactivated!");
                         vbox.setStyle("-fx-background-color: #F4F4F4;");
                     }
                 }
-                if (keyEvent.getCode() == KeyCode.F5){
+                if (keyEvent.getCode() == KeyCode.F5) {
                     System.out.println("--- execute ---");
-                    outputArea.setText(CommandHandler.execute(commandLineArea.getText()));
+                    String output = CommandHandler.execute(commandLineArea.getText());
+                    if (output != null)
+                        outputArea.setText(output);
                 }
-                if (keyEvent.getCode() == KeyCode.F8){
+                if (keyEvent.getCode() == KeyCode.F8) {
                     outputArea.setText(Log.getNewestLogText());
                 }
             }
         });
 
         executeButton.setOnAction(new EventHandler<ActionEvent>() {
-            public void handle(ActionEvent event)
-            {
+            public void handle(ActionEvent event) {
                 System.out.println("--- execute ---");
-                outputArea.setText(CommandHandler.execute(commandLineArea.getText()));
+                String output = CommandHandler.execute(commandLineArea.getText());
+                if (output != null)
+                    outputArea.setText(output);
             }
         });
 
@@ -100,7 +96,6 @@ public class GUI extends Application {
         });
 
 
-
         primaryStage.setScene(scene);
         primaryStage.show();
 
@@ -108,7 +103,6 @@ public class GUI extends Application {
         HSQLDB.instance.setupConnection();
         //create objects of participants and channels
         HSQLDB.instance.loadDatabase();
-
 
 
         //close connection to database when window is closing
@@ -120,8 +114,21 @@ public class GUI extends Application {
         });
     }
 
-    public void writeTextToOutputArea(String text)
-    {
+    public void writeTextToOutputArea(String text) {
         outputArea.setText(text);
+    }
+
+    public void addTextToOutputArea(String text) {
+        String currentOutpuArea = outputArea.getText();
+        if (currentOutpuArea.equals("")) {
+            outputArea.setText(text);
+        } else {
+            outputArea.setText(outputArea.getText() + "\n" + text);
+        }
+
+    }
+
+    public void clearOutputArea() {
+        outputArea.setText("");
     }
 }

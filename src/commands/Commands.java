@@ -1,9 +1,9 @@
 package commands;
 
+import configuration.Configuration;
 import cryptography.AlgorithmLoader;
 import cryptography.CrackerLoader;
 import network.*;
-import configuration.Configuration;
 import persistence.DataStore;
 import persistence.HSQLDB;
 import persistence.Log;
@@ -12,21 +12,23 @@ import persistence.LogOperationType;
 import java.io.File;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 
 public class Commands {
 
-    public static String resetDatabase(){
+    public static String resetDatabase() {
         HSQLDB.instance.resetDatabase();
         return "Database reset complete!";
     }
 
-    public static String showAlgorithm(){
+    public static String showAlgorithm() {
         File componentDirectory = new File(Configuration.instance.componentDirectory);
 
         String returnString = "";
@@ -34,156 +36,155 @@ public class Commands {
             File[] componentFiles = componentDirectory.listFiles();
 
             if (componentFiles.length > 0) {
-                for (int i=0; i<componentFiles.length; i++){
-                    if ((!componentFiles[i].getName().contains("_cracker"))&&(componentFiles[i].getName().matches(".*\\.jar"))){
-                        String algorithmName = componentFiles[i].getName().replace(".jar","");
+                for (int i = 0; i < componentFiles.length; i++) {
+                    if ((!componentFiles[i].getName().contains("_cracker")) && (componentFiles[i].getName().matches(".*\\.jar"))) {
+                        String algorithmName = componentFiles[i].getName().replace(".jar", "");
                         returnString += algorithmName;
                         returnString += " | ";
                     }
                 }
-                return returnString.substring(0,returnString.length()-3);
+                return returnString.substring(0, returnString.length() - 3);
             }
             return "No components found in this directory!";
         }
         return "No directory 'component' found!";
     }
 
-    public static String encryptMessage(String message, String algorithm, String filename){
+    public static String encryptMessage(String message, String algorithm, String filename) {
         Log log = null;
 
-        if (Configuration.instance.getDebugModeActive()){
+        if (Configuration.instance.getDebugModeActive()) {
             log = new Log(LogOperationType.encrypt, algorithm);
         }
 
         printInfo("EncryptMessage-Method entered with the following parameters:", log);
-        printInfo("Message: "+message, log);
-        printInfo("Algorithm: "+algorithm, log);
-        printInfo("Filename of Keyfile: "+filename+"\n", log);
+        printInfo("Message: " + message, log);
+        printInfo("Algorithm: " + algorithm, log);
+        printInfo("Filename of Keyfile: " + filename + "\n", log);
 
 
         File keyFile = getKeyFileFromFileName(filename);
-        printInfo("Created File-Object for Keyfile\n",log);
+        printInfo("Created File-Object for Keyfile\n", log);
 
-        String nameOfClass = algorithm.substring(0,1).toUpperCase();
-        if(algorithm.length()>1){
+        String nameOfClass = algorithm.substring(0, 1).toUpperCase();
+        if (algorithm.length() > 1) {
             nameOfClass += algorithm.substring(1);
         }
 
-        if(algorithm.equals("rsa")){
+        if (algorithm.equals("rsa")) {
             nameOfClass = "RSA";
         }
 
-        printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
+        printInfo("Generated nameOfClass: " + nameOfClass + "\n", log);
 
 
         AlgorithmLoader algorithmLoader = new AlgorithmLoader(algorithm, nameOfClass);
-        printInfo("Imported algorithm!",log);
+        printInfo("Imported algorithm!", log);
         String encryptedMessage = algorithmLoader.executeEncryptMethod(message, keyFile);
-        printInfo("Message encryption with "+algorithm+" completed!\n",log);
+        printInfo("Message encryption with " + algorithm + " completed!\n", log);
 
-        printInfo("Encrypted message: "+encryptedMessage+"\n",log);
+        printInfo("Encrypted message: " + encryptedMessage + "\n", log);
 
 
         return encryptedMessage;
     }
 
-    public static String decryptMessage(String message, String algorithm, String filename){
+    public static String decryptMessage(String message, String algorithm, String filename) {
         Log log = null;
-        if (Configuration.instance.getDebugModeActive()){
+        if (Configuration.instance.getDebugModeActive()) {
             log = new Log(LogOperationType.decrypt, algorithm);
         }
         printInfo("DecryptMessage-Method entered with the following parameters:", log);
-        printInfo("Encrypted Message: "+message, log);
-        printInfo("Algorithm: "+algorithm, log);
-        printInfo("Filename of Keyfile: "+filename+"\n", log);
+        printInfo("Encrypted Message: " + message, log);
+        printInfo("Algorithm: " + algorithm, log);
+        printInfo("Filename of Keyfile: " + filename + "\n", log);
 
 
         File keyFile = getKeyFileFromFileName(filename);
-        printInfo("Created File-Object for Keyfile\n",log);
+        printInfo("Created File-Object for Keyfile\n", log);
 
-        String nameOfClass = algorithm.substring(0,1).toUpperCase();
-        if(algorithm.length()>1){
+        String nameOfClass = algorithm.substring(0, 1).toUpperCase();
+        if (algorithm.length() > 1) {
             nameOfClass += algorithm.substring(1);
         }
 
-        if(algorithm.equals("rsa")){
+        if (algorithm.equals("rsa")) {
             nameOfClass = "RSA";
         }
 
-        printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
+        printInfo("Generated nameOfClass: " + nameOfClass + "\n", log);
 
 
         AlgorithmLoader algorithmLoader = new AlgorithmLoader(algorithm, nameOfClass);
-        printInfo("Imported algorithm!",log);
+        printInfo("Imported algorithm!", log);
         String decryptedMessage = algorithmLoader.executeDecryptMethod(message, keyFile);
-        printInfo("Message decryption with "+algorithm+" completed!\n",log);
+        printInfo("Message decryption with " + algorithm + " completed!\n", log);
 
-        printInfo("Decrypted message: "+decryptedMessage+"\n",log);
+        printInfo("Decrypted message: " + decryptedMessage + "\n", log);
 
 
         return decryptedMessage;
     }
 
-    private static void printInfo(String text, Log log){
+    private static void printInfo(String text, Log log) {
         System.out.println(text);
-        if(log != null){
+        if (log != null) {
             log.addLineToLog(text);
         }
     }
 
-    public static String crackEncryptedMessage(String message, String algorithm, String filename){
+    public static String crackEncryptedMessage(String message, String algorithm, String filename) {
         Log log = null;
         File keyFile = null;
 
-        if (Configuration.instance.getDebugModeActive()){
+        if (Configuration.instance.getDebugModeActive()) {
             log = new Log(LogOperationType.crack, algorithm);
         }
         printInfo("CrackMessage-Method entered with the following parameters:", log);
-        printInfo("Message: "+message, log);
-        printInfo("Algorithm: "+algorithm, log);
-        if (filename != null){
-            printInfo("Filename of Keyfile: "+filename+"\n", log);
+        printInfo("Message: " + message, log);
+        printInfo("Algorithm: " + algorithm, log);
+        if (filename != null) {
+            printInfo("Filename of Keyfile: " + filename + "\n", log);
             keyFile = getKeyFileFromFileName(filename);
-            printInfo("Created File-Object for Keyfile (contains public key)\n",log);
+            printInfo("Created File-Object for Keyfile (contains public key)\n", log);
         }
 
-        String nameOfClass = algorithm.substring(0,1).toUpperCase();
-        if(algorithm.length()>1){
+        String nameOfClass = algorithm.substring(0, 1).toUpperCase();
+        if (algorithm.length() > 1) {
             nameOfClass += algorithm.substring(1);
         }
 
-        if(algorithm.equals("rsa")){
+        if (algorithm.equals("rsa")) {
             nameOfClass = "RSA";
         }
         nameOfClass += "Cracker";
 
-        printInfo("Generated nameOfClass: "+nameOfClass+"\n",log);
+        printInfo("Generated nameOfClass: " + nameOfClass + "\n", log);
 
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         String crackedMessage = null;
-        long startTime = System.currentTimeMillis( );
+        long startTime = System.currentTimeMillis();
 
 
         try {
-            if(keyFile !=null){
-                crackedMessage = executorService.submit(CrackerLoader.getCrackerCallable(algorithm,nameOfClass, message, keyFile)).get(Configuration.instance.secondsToCrack, SECONDS);
-            }
-            else{
-                crackedMessage = executorService.submit(CrackerLoader.getCrackerCallable(algorithm,nameOfClass, message)).get(Configuration.instance.secondsToCrack, SECONDS);
+            if (keyFile != null) {
+                crackedMessage = executorService.submit(CrackerLoader.getCrackerCallable(algorithm, nameOfClass, message, keyFile)).get(Configuration.instance.secondsToCrack, SECONDS);
+            } else {
+                crackedMessage = executorService.submit(CrackerLoader.getCrackerCallable(algorithm, nameOfClass, message)).get(Configuration.instance.secondsToCrack, SECONDS);
             }
 
         } catch (TimeoutException | InterruptedException | ExecutionException e) {
-            printInfo("Cracking took longer than "+ Configuration.instance.secondsToCrack +" seconds and is terminated!\n", log);
+            printInfo("Cracking took longer than " + Configuration.instance.secondsToCrack + " seconds and is terminated!\n", log);
         }
-        long endTime = System.currentTimeMillis( );
+        long endTime = System.currentTimeMillis();
         executorService.shutdownNow();
 
-        if (crackedMessage != null){
-            printInfo("Cracking message with "+algorithm+"_cracker was successful and took " +Long.toString(endTime - startTime) + " ms.",log);
-            printInfo("Decrypted/Cracked message: "+crackedMessage,log);
+        if (crackedMessage != null) {
+            printInfo("Cracking message with " + algorithm + "_cracker was successful and took " + (endTime - startTime) + " ms.", log);
+            printInfo("Decrypted/Cracked message: " + crackedMessage, log);
             return crackedMessage;
         }
-        return "cracking encrypted message \""+message+"\" failed";
+        return "cracking encrypted message \"" + message + "\" failed";
     }
 
     public static String registerParticipant(String name, ParticipantType type) {
@@ -191,8 +192,7 @@ public class Commands {
         try {
             //check if name already exists in table participants
             ResultSet nameExists = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM participants WHERE name = '" + name + "'");
-            if (nameExists.next())
-            {
+            if (nameExists.next()) {
                 String output = "participant " + name + " already exists, using existing postbox_" + name;
                 System.out.println("--- " + output);
                 return output;
@@ -210,17 +210,13 @@ public class Commands {
             //get id from database
             ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM participants WHERE name = '" + name + "'");
             int partID = 0;
-            if(resultSet1.next())
-            {
+            if (resultSet1.next()) {
                 partID = resultSet1.getInt("id");
             }
             //Object of Participant is instantiated
-            if(typeID == 1)
-            {
+            if (typeID == 1) {
                 DataStore.instance.addParticipant(new ParticipantNormal(partID, name));
-            }
-            else if (typeID == 2)
-            {
+            } else if (typeID == 2) {
                 DataStore.instance.addParticipant(new ParticipantIntruder(partID, name));
             }
 
@@ -228,9 +224,7 @@ public class Commands {
             System.out.println("--- " + outputSuccess);
             return outputSuccess;
 
-        }
-        catch (SQLException sqlException)
-        {
+        } catch (SQLException sqlException) {
             String exOutput = "[method registerParticipant] SQLException: " + sqlException.getMessage();
             System.out.println(exOutput);
             return exOutput;
@@ -238,7 +232,7 @@ public class Commands {
 
     }
 
-    public static String createChannel(String name, String part1Name, String part2Name){
+    public static String createChannel(String name, String part1Name, String part2Name) {
         try {
 
             //check if participants are of type normal
@@ -246,23 +240,17 @@ public class Commands {
             Participant participant2 = DataStore.instance.getParticipantByName(part2Name);
             ParticipantNormal part1;
             ParticipantNormal part2;
-            if (participant1 instanceof ParticipantNormal)
-            {
-                part1 = (ParticipantNormal)participant1;
-                if (participant2 instanceof ParticipantNormal)
-                {
-                    part2 = (ParticipantNormal)participant2;
-                }
-                else
-                {
+            if (participant1 instanceof ParticipantNormal) {
+                part1 = (ParticipantNormal) participant1;
+                if (participant2 instanceof ParticipantNormal) {
+                    part2 = (ParticipantNormal) participant2;
+                } else {
                     //return message for output area when participant2 not of type normal
                     String outputFalseType = "participant " + part2Name + " not of type normal";
                     System.out.println("--- " + outputFalseType);
                     return outputFalseType;
                 }
-            }
-            else
-            {
+            } else {
                 //return message for output area when participant1 not of type normal
                 String outputFalseType = "participant " + part1Name + " not of type normal";
                 System.out.println("--- " + outputFalseType);
@@ -272,8 +260,7 @@ public class Commands {
 
             //check if channel exists or not
             ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
-            if (resultSet1.next())
-            {
+            if (resultSet1.next()) {
                 //return message for output area
                 String outputChannelExists = "channel " + name + " already exists";
                 System.out.println("--- " + outputChannelExists);
@@ -282,12 +269,10 @@ public class Commands {
 
             //check if channel between participant01 and participant02 exists or not
             ResultSet resultSet2 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel");
-            while (resultSet2.next())
-            {
+            while (resultSet2.next()) {
                 boolean firstCheck = resultSet2.getInt("participant_01") == part1.getId() && resultSet2.getInt("participant_02") == part2.getId();
                 boolean switchCheck = resultSet2.getInt("participant_01") == part2.getId() && resultSet2.getInt("participant_02") == part1.getId();
-                if (firstCheck || switchCheck)
-                {
+                if (firstCheck || switchCheck) {
                     //return message for output area
                     String outputCommunicationExists = "communication channel between " + part1.getName() + " and " + part2.getName() + " already exists";
                     System.out.println("--- " + outputCommunicationExists);
@@ -296,8 +281,7 @@ public class Commands {
             }
 
             //check if participant01 and participant02 are identical
-            if (part1.getName().equals(part2.getName()))
-            {
+            if (part1.getName().equals(part2.getName())) {
                 //return message for output area
                 String outputParticipantsEqual = part1.getName() + " and " + part2.getName() + " are identical - cannot create channel on itself";
                 System.out.println("--- " + outputParticipantsEqual);
@@ -321,58 +305,47 @@ public class Commands {
             String outputSuccess = "channel " + name + " from " + part1.getName() + " and " + part2.getName() + " successfully created";
             System.out.println("--- " + outputSuccess);
             return outputSuccess;
-        }
-        catch (SQLException sqlException)
-        {
+        } catch (SQLException sqlException) {
             String exOutput = "[method createChannel in Commands] SQLException: " + sqlException.getMessage();
             System.out.println(exOutput);
             return exOutput;
         }
     }
 
-    public static String showChannel(){
-        try
-        {
+    public static String showChannel() {
+        try {
             //get all channels from database
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel");
             String output = "";
-            while (resultSet.next())
-            {
+            while (resultSet.next()) {
                 output += resultSet.getNString("name") + "\t| " + HSQLDB.instance.getParticipantNameByID(resultSet.getInt("participant_01"))
                         + " and " + HSQLDB.instance.getParticipantNameByID(resultSet.getInt("participant_02")) + "\n";
 
             }
-            if (output.equals(""))
-            {
+            if (output.equals("")) {
                 output = "no channels are created by now";
             }
             System.out.print("--- channel: \n" + output);
             return output;
 
 
-        }
-        catch (SQLException sqlException)
-        {
+        } catch (SQLException sqlException) {
             String exOutput = "[method showChannel] SQLException: " + sqlException.getMessage();
             System.out.println(exOutput);
             return exOutput;
         }
     }
 
-    public static String dropChannel(String name){
-        try
-        {
+    public static String dropChannel(String name) {
+        try {
             String output = "";
 
             //check if channel exists or not
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
-            if (resultSet.next())
-            {
+            if (resultSet.next()) {
                 HSQLDB.instance.updateCommand("DELETE FROM channel WHERE name = '" + name + "'");
                 output = "channel " + name + " deleted";
-            }
-            else
-            {
+            } else {
                 output = "unknown channel " + name;
             }
             //delete channel in ArrayList from DataStore
@@ -383,27 +356,22 @@ public class Commands {
 
 
             return output;
-        }
-        catch (SQLException sqlException)
-        {
+        } catch (SQLException sqlException) {
             String exOutput = "[method showChannel] SQLException: " + sqlException.getMessage();
             System.out.println(exOutput);
             return exOutput;
         }
     }
 
-    public static String intrudeChannel(String name, String participantName){
+    public static String intrudeChannel(String name, String participantName) {
 
         try {
             //check if participant is of type intruder
             Participant part = DataStore.instance.getParticipantByName(participantName);
             ParticipantIntruder participant;
-            if (part instanceof ParticipantIntruder)
-            {
-                participant = (ParticipantIntruder)part;
-            }
-            else
-            {
+            if (part instanceof ParticipantIntruder) {
+                participant = (ParticipantIntruder) part;
+            } else {
                 //return message for output area when participant not of type intruder
                 String outputFalseType = "participant " + participantName + " not of type intruder";
                 System.out.println("--- " + outputFalseType);
@@ -412,8 +380,7 @@ public class Commands {
 
             //check if channel exists or not
             ResultSet resultSet1 = HSQLDB.instance.getDataFromManualSQL("SELECT * FROM channel WHERE name = '" + name + "'");
-            if (!resultSet1.next())
-            {
+            if (!resultSet1.next()) {
                 //return message for output area when channel does not exist
                 String outputNotExist = "channel " + name + " does not exist";
                 System.out.println("--- " + outputNotExist);
@@ -421,9 +388,8 @@ public class Commands {
             }
 
             //register ParticipantIntruder for Channel
-            for (Channel c: DataStore.instance.getChannels()) {
-                if (c.getName().equals(name))
-                {
+            for (Channel c : DataStore.instance.getChannels()) {
+                if (c.getName().equals(name)) {
                     c.register(participant);
                     //return message for output area when participant registered for channel
                     String outputSuccess = "channel " + name + " intruded by participant " + participant.getName();
@@ -438,27 +404,22 @@ public class Commands {
             return outputError;
 
 
-        }
-        catch (SQLException sqlException)
-        {
+        } catch (SQLException sqlException) {
             String exOutput = "[method intrudeChannel in Commands] SQLException: " + sqlException.getMessage();
             System.out.println(exOutput);
             return exOutput;
         }
     }
 
-    public static String sendMessage(String message, String part1, String part2, String algorithm, String keyFileName){
-
+    public static String sendMessage(String message, String part1, String part2, String algorithm, String keyFileName) {
+        Configuration.instance.gui.clearOutputArea();
         //get objects participants from DataStore
         ParticipantNormal participant01 = null;
         ParticipantNormal participant02 = null;
-        for (Participant p: DataStore.instance.getParticipants()) {
-            if (p.getName().equals(part1) && p instanceof ParticipantNormal)
-            {
+        for (Participant p : DataStore.instance.getParticipants()) {
+            if (p.getName().equals(part1) && p instanceof ParticipantNormal) {
                 participant01 = (ParticipantNormal) p;
-            }
-            else if (p.getName().equals(part2) && p instanceof ParticipantNormal)
-            {
+            } else if (p.getName().equals(part2) && p instanceof ParticipantNormal) {
                 participant02 = (ParticipantNormal) p;
             }
         }
@@ -467,8 +428,7 @@ public class Commands {
         try {
             String statement1 = "SELECT name FROM channel WHERE participant_01 = " + participant01.getId() + " AND participant_02 = " + participant02.getId();
             String statement2 = "SELECT name FROM channel WHERE participant_01 = " + participant02.getId() + " AND participant_02 = " + participant01.getId();
-            if (!(HSQLDB.instance.getDataFromManualSQL(statement1).next() || HSQLDB.instance.getDataFromManualSQL(statement2).next()))
-            {
+            if (!(HSQLDB.instance.getDataFromManualSQL(statement1).next() || HSQLDB.instance.getDataFromManualSQL(statement2).next())) {
                 //no channel exists
                 String output = "no valid channel from " + part1 + " to " + part2;
                 System.out.println("--- " + output);
@@ -481,8 +441,7 @@ public class Commands {
             //save message in database
             ResultSet resultSet = HSQLDB.instance.getDataFromManualSQL("SELECT id FROM algorithms WHERE name = '" + algorithm + "'");
             int algorithmID = 0;
-            if (resultSet.next())
-            {
+            if (resultSet.next()) {
                 algorithmID = resultSet.getInt("id");
             }
             int unixTimeStampSeconds = (int) (System.currentTimeMillis() / 1000L); //only works until 2038
@@ -494,17 +453,16 @@ public class Commands {
             //return message for output area
             String outputSuccess = "message sent from participant " + part1 + " to participant " + part2;
             System.out.println("--- " + outputSuccess);
-            return outputSuccess;
-        }
-        catch (SQLException sqlException)
-        {
+            Configuration.instance.gui.addTextToOutputArea(outputSuccess);
+            return null;
+        } catch (SQLException sqlException) {
             String exOutput = "[method sendMessage in Commands] SQLException: " + sqlException.getMessage();
             System.out.println(exOutput);
             return exOutput;
         }
     }
 
-    private static File getKeyFileFromFileName(String fileName){
-        return new File(Configuration.instance.keyDirectory+Configuration.instance.fileSeparator+fileName);
+    private static File getKeyFileFromFileName(String fileName) {
+        return new File(Configuration.instance.keyDirectory + Configuration.instance.fileSeparator + fileName);
     }
 }

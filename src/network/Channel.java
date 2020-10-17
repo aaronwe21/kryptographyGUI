@@ -6,8 +6,7 @@ public class Channel extends EventBus {
 
     private String name;
 
-    public Channel (String name)
-    {
+    public Channel(String name) {
         super();
         this.name = name;
     }

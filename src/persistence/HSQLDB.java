@@ -2,12 +2,12 @@ package persistence;
 
 import commands.Commands;
 import configuration.Configuration;
-import javafx.scene.web.HTMLEditorSkin;
-import network.*;
+import network.Channel;
+import network.ParticipantIntruder;
+import network.ParticipantNormal;
+import network.ParticipantType;
 
-import javax.xml.crypto.Data;
 import java.sql.*;
-import java.util.ArrayList;
 
 public enum HSQLDB {
     instance;
@@ -394,7 +394,7 @@ public enum HSQLDB {
 
     //endregion
 
-    public ResultSet getDataFromManualSQL(String sqlStatement){
+    public ResultSet getDataFromManualSQL(String sqlStatement) {
         try {
             Statement statement = connection.createStatement();
             ResultSet result = statement.executeQuery(sqlStatement);
@@ -474,9 +474,7 @@ public enum HSQLDB {
             Commands.createChannel("syd_sfo", "branch_syd", "branch_sfo");
 
 
-        }
-        catch (SQLException sqlException)
-        {
+        } catch (SQLException sqlException) {
             System.out.println("[Exception in resetDatabase] " + sqlException.getMessage());
         }
 
@@ -490,25 +488,20 @@ public enum HSQLDB {
             ResultSet resultSetChannels = getDataFromManualSQL("SELECT * FROM channel");
 
             //create objects of Participant
-            while (resultSetPart.next())
-            {
-                if (resultSetPart.getInt("type_id") == 1)
-                {
+            while (resultSetPart.next()) {
+                if (resultSetPart.getInt("type_id") == 1) {
                     DataStore.instance.addParticipant(new ParticipantNormal(resultSetPart.getInt("id"), resultSetPart.getNString("name")));
-                }
-                else
-                {
+                } else {
                     DataStore.instance.addParticipant(new ParticipantIntruder(resultSetPart.getInt("id"), resultSetPart.getNString("name")));
                 }
             }
 
             //create objects of Channel
-            while(resultSetChannels.next())
-            {
+            while (resultSetChannels.next()) {
                 //create Object Channel and register Participants
                 Channel channel = new Channel(resultSetChannels.getNString("name"));
-                ParticipantNormal part1 = (ParticipantNormal)DataStore.instance.getParticipantByID(resultSetChannels.getInt("participant_01"));
-                ParticipantNormal part2 = (ParticipantNormal)DataStore.instance.getParticipantByID(resultSetChannels.getInt("participant_02"));
+                ParticipantNormal part1 = (ParticipantNormal) DataStore.instance.getParticipantByID(resultSetChannels.getInt("participant_01"));
+                ParticipantNormal part2 = (ParticipantNormal) DataStore.instance.getParticipantByID(resultSetChannels.getInt("participant_02"));
 
                 channel.register(part1);
                 channel.register(part2);
@@ -518,9 +511,7 @@ public enum HSQLDB {
                 part1.addChannel(channel);
                 part2.addChannel(channel);
             }
-        }
-        catch (SQLException sqlException)
-        {
+        } catch (SQLException sqlException) {
             System.out.println("[Exception in resetDatabase] " + sqlException.getMessage());
         }
     }
